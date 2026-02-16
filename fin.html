@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinTrack Pro | Smart Expense Tracker</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   
+    <style>
+        /* --- CSS Variables & Reset --- */
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: #e0e7ff;
+           
+            --bg-body: #f1f5f9;
+            --bg-sidebar: #0f172a;
+            --bg-card: #ffffff;
+           
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --text-sidebar: #94a3b8;
+            --text-sidebar-hover: #f8fafc;
+
+            --border: #e2e8f0;
+           
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .text-sm { font-size: 0.875rem; }
+        .font-bold { font-weight: 600; }
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--success); }
+
+        /* --- UI Elements --- */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 1px 2px rgba(99, 102, 241, 0.3); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--bg-body); border-color: #cbd5e1; }
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-danger:hover { background: #fecaca; }
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: rgba(0,0,0,0.05); color: var(--text-main); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+
+        input, select {
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            width: 100%;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            background: white;
+            color: var(--text-main);
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* --- Auth Screen --- */
+        #auth-view {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            position: relative;
+        }
+        #auth-view::before {
+            content: '';
+            position: absolute;
+            top: -100px; left: -100px;
+            width: 400px; height: 400px;
+            background: var(--primary);
+            opacity: 0.05;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+        }
+        .auth-card {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.5);
+            z-index: 10;
+        }
+        .auth-header { text-align: center; margin-bottom: 2rem; }
+        .auth-logo {
+            width: 48px; height: 48px;
+            background: var(--primary);
+            border-radius: 12px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .auth-tabs {
+            display: flex;
+            background: var(--bg-body);
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .auth-tab.active { background: white; color: var(--primary); box-shadow: var(--shadow-sm); }
+
+        /* --- App Layout --- */
+        #app-view { display: flex; height: 100vh; }
+        aside {
+            width: 260px;
+            background: var(--bg-sidebar);
+            color: var(--text-sidebar);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0 0.5rem 2rem 0.5rem;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.025em;
+        }
+        .nav-group { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 2rem; }
+        .nav-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-sidebar);
+            margin: 0 0.75rem 0.5rem 0.75rem;
+            opacity: 0.7;
+        }
+        .nav-item {
+            padding: 0.6rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-sidebar-hover); }
+        .nav-item.active { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .nav-icon { opacity: 0.7; width: 18px; text-align: center; }
+       
+        .user-profile {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .user-avatar {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            background: var(--bg-body);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        h1, h2 { letter-spacing: -0.02em; }
+        h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0.25rem 0;
+            color: var(--text-main);
+        }
+        .stat-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+
+        /* Tables */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .card-title { font-weight: 600; color: var(--text-main); font-size: 1.1rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: #f8fafc; color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #f8fafc; }
+       
+        .category-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            background: var(--bg-body);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* Charts */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem; /* Increased gap for larger visuals */
+            align-items: start;
+        }
+        /* INCREASED SIZE */
+        .chart-wrapper {
+            position: relative;
+            height: 500px; /* Increased from 400px */
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+            border: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Toast */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .toast {
+            background: white;
+            color: var(--text-main);
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.9rem;
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 300px;
+            border-left: 4px solid var(--primary);
+        }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 1024px) { .charts-container { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            #app-view { flex-direction: column; }
+            aside { width: 100%; height: auto; padding: 1rem; flex-direction: row; justify-content: space-between; border-right: none; border-bottom: 1px solid var(--border); }
+            .nav-menu { display: none; }
+            .sidebar-logo { padding: 0; margin-bottom: 0; }
+            .user-profile { border-top: none; padding-top: 0; margin-top: 0; }
+            .nav-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Auth View -->
+    <section id="auth-view">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <h2 style="margin-bottom: 0.5rem; font-weight: 700;">Welcome Back</h2>
+                <p style="color: var(--text-secondary);">Setup your financial profile.</p>
+            </div>
+           
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuth('login')" id="tab-login">Login</div>
+                <div class="auth-tab" onclick="switchAuth('register')" id="tab-register">Register</div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <label>Username</label>
+                <input type="text" id="login-user" required placeholder="e.g. student1">
+                <label>Password</label>
+                <input type="password" id="login-pass" required placeholder="•••••••">
+                <button type="submit" class="btn btn-primary w-full mt-4">Sign In</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="hidden" onsubmit="handleRegister(event)">
+                <div class="flex gap-4">
+                    <div class="w-full">
+                        <label>Choose Username</label>
+                        <input type="text" id="reg-user" required placeholder="e.g. student1">
+                    </div>
+                    <div class="w-full">
+                        <label>Choose Password</label>
+                        <input type="password" id="reg-pass" required placeholder="•••••••">
+                    </div>
+                </div>
+               
+                <label>Salary Amount ($)</label>
+                <input type="number" id="reg-salary" required placeholder="5000" min="0">
+               
+                <label>Salary Type</label>
+                <select id="reg-salary-type" required>
+                    <option value="monthly">Monthly</option>
+                    <option value="annual">Annual (Yearly)</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary w-full mt-4">Create Account</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Main App View -->
+    <section id="app-view" class="hidden">
+        <aside>
+            <div class="sidebar-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                FinTrack Pro
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-label">Overview</div>
+                <div class="nav-item active" onclick="navigate('dashboard')" id="nav-dashboard">
+                    <span class="nav-icon">📊</span> Dashboard
+                </div>
+                <div class="nav-item" onclick="navigate('expenses')" id="nav-expenses">
+                    <span class="nav-icon">📝</span> Expenses
+                </div>
+                <div class="nav-label">Analysis</div>
+                <div class="nav-item" onclick="navigate('reports')" id="nav-reports">
+                    <span class="nav-icon">📈</span> Analytics
+                </div>
+                <div class="nav-item" onclick="navigate('settings')" id="nav-settings">
+                    <span class="nav-icon">⚙️</span> Settings
+                </div>
+            </nav>
+            <div class="user-profile">
+                <div class="user-avatar" id="user-avatar">S</div>
+                <div style="flex:1;">
+                    <div class="text-sm font-bold" style="color: white;" id="display-username">Student</div>
+                    <div class="text-sm" style="color: var(--text-sidebar); font-size: 0.75rem;">Pro Plan</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="logout()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </div>
+        </aside>
+
+        <main>
+            <!-- Dashboard Section -->
+            <div id="page-dashboard">
+                <header>
+                    <div>
+                        <h2>Dashboard</h2>
+                        <p class="text-sm text-secondary">Financial overview for this month.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal()">+ Add Expense</button>
+                </header>
+
+                <div class="stats-grid">
+                    <!-- Total Income Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-label">Total Income</div>
+                            <div class="stat-icon">💵</div>
+                        </div>
+                        <div class="stat-value" id="dash-income">$0.00</div>
+                        <div class="text-sm text-secondary" id="income-subtext">Salary + Bonuses</div>
+                    </div>
+                   
+                    <!-- Total Expenses Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-label">Total Expenses</div>
+                            <div class="stat-icon" style="background: #fee2e2; color: #ef4444;">📉</div>
+                        </div>
+                        <div class="stat-value" id="dash-spent">$0.00</div>
+                    </div>
+
+                    <!-- Net Savings Card -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-label">Net Savings</div>
+                            <div class="stat-icon" style="background: #dcfce7; color: #10b981;">💎</div>
+                        </div>
+                        <div class="stat-value" id="dash-savings">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Recent Transactions</div>
+                        <button class="btn btn-ghost btn-sm" onclick="navigate('expenses')">View All</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="recent-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expenses Section -->
+            <div id="page-expenses" class="hidden">
+                <header>
+                    <div>
+                        <h2>Expenses</h2>
+                        <p class="text-sm text-secondary">Manage and track your daily spending.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal()">+ Add New</button>
+                </header>
+               
+                <div class="card">
+                    <div class="card-header" style="justify-content: flex-start; align-items: center;">
+                        <div class="flex gap-2 w-full items-center">
+                            <div style="width: 160px;">
+                                <input type="date" id="filter-date" style="margin-bottom: 0;" onchange="renderExpenseTable()">
+                            </div>
+                            <input type="text" id="search-expense" placeholder="Search transactions..." style="margin-bottom: 0;" onkeyup="renderExpenseTable()">
+                        </div>
+                    </div>
+                    <table id="full-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="page-reports" class="hidden">
+                <header>
+                    <div>
+                        <h2>Analytics</h2>
+                        <p class="text-sm text-secondary">Breakdown of your financial habits.</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="generateReport()">Download Report</button>
+                </header>
+                <div class="charts-container">
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Category Distribution</div></div>
+                        <div class="chart-wrapper">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><div class="card-title">Annual Spending Trend</div></div>
+                        <div class="chart-wrapper">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="page-settings" class="hidden">
+                <header>
+                    <div>
+                        <h2>Settings</h2>
+                        <p class="text-sm text-secondary">Manage your income and bonuses.</p>
+                    </div>
+                </header>
+
+                <!-- Salary Card -->
+                <div class="card" style="max-width: 800px; margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <div class="card-title">Salary Configuration</div>
+                    </div>
+                    <div style="padding: 2rem;">
+                        <div class="flex gap-4">
+                            <div class="w-full">
+                                <label>Salary Amount ($)</label>
+                                <input type="number" id="settings-salary" placeholder="5000">
+                            </div>
+                            <div class="w-full">
+                                <label>Type</label>
+                                <select id="settings-salary-type">
+                                    <option value="monthly">Monthly</option>
+                                    <option value="annual">Annual (Yearly)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="updateSalarySettings()">Update Salary</button>
+                    </div>
+                </div>
+
+                <!-- Bonuses Card -->
+                <div class="card" style="max-width: 800px;">
+                    <div class="card-header">
+                        <div class="card-title">One-time Bonuses</div>
+                        <button class="btn btn-sm btn-outline" onclick="openBonusModal()">+ Add Bonus</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="bonus-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <!-- Expense Modal -->
+    <div id="expense-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold" style="font-size: 1.2rem;" id="modal-title">Add Expense</h3>
+                <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
+            </div>
+            <form id="expense-form" onsubmit="handleExpenseSubmit(event)">
+                <input type="hidden" id="edit-id">
+                <label>Description</label>
+                <input type="text" id="exp-desc" required placeholder="e.g. Lunch at cafeteria">
+                <div class="flex gap-4">
+                    <div class="w-full">
+                        <label>Amount ($)</label>
+                        <input type="number" id="exp-amount" required min="0.01" step="0.01">
+                    </div>
+                    <div class="w-full">
+                        <label>Date</label>
+                        <input type="date" id="exp-date" required>
+                    </div>
+                </div>
+               
+                <label>Category</label>
+                <input type="text" list="category-list" id="exp-category" required placeholder="Select or type new category">
+                <datalist id="category-list">
+                    <option value="Food">
+                    <option value="Transport">
+                    <option value="Education">
+                    <option value="Entertainment">
+                    <option value="Utilities">
+                    <option value="Shopping">
+                    <option value="Health">
+                    <option value="Other">
+                </datalist>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bonus Modal -->
+    <div id="bonus-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold" style="font-size: 1.2rem;">Add Bonus</h3>
+                <button class="btn btn-ghost btn-sm" onclick="closeBonusModal()">✕</button>
+            </div>
+            <form id="bonus-form" onsubmit="handleBonusSubmit(event)">
+                <label>Description</label>
+                <input type="text" id="bonus-desc" required placeholder="e.g. Holiday Bonus">
+                <div class="flex gap-4">
+                    <div class="w-full">
+                        <label>Amount ($)</label>
+                        <input type="number" id="bonus-amount" required min="0.01" step="0.01">
+                    </div>
+                    <div class="w-full">
+                        <label>Date Received</label>
+                        <input type="date" id="bonus-date" required>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeBonusModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Bonus</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Global variables to hold Chart.js instances
+        let pieChartInstance = null;
+        let barChartInstance = null;
+
+        const DB_KEY = 'smart_expense_tracker_db';
+        let state = { users: [], currentUser: null };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            checkSession();
+            document.getElementById('exp-date').valueAsDate = new Date();
+            document.getElementById('bonus-date').valueAsDate = new Date();
+        });
+
+        function ensureStateStructure() {
+            if (!state.users) state.users = [];
+            if (!Array.isArray(state.users)) state.users = [];
+            if (state.currentUser) {
+                const userExists = state.users.find(u => u.username === state.currentUser.username);
+                if (!userExists) {
+                    state.users.push(state.currentUser);
+                } else {
+                    state.currentUser = userExists;
+                }
+            }
+            if (state.currentUser) {
+                if(!state.currentUser.salary) state.currentUser.salary = 0;
+                if(!state.currentUser.salaryType) state.currentUser.salaryType = 'monthly';
+                if(!state.currentUser.bonuses) state.currentUser.bonuses = [];
+            }
+        }
+
+        function loadData() {
+            try {
+                const stored = localStorage.getItem(DB_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    state = { ...state, ...parsed };
+                }
+                ensureStateStructure();
+            } catch (e) {
+                console.error("Data load error", e);
+                localStorage.removeItem(DB_KEY);
+            }
+        }
+
+        function saveData() {
+            ensureStateStructure();
+            localStorage.setItem(DB_KEY, JSON.stringify(state));
+        }
+
+        // --- Auth System ---
+        function switchAuth(type) {
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabReg = document.getElementById('tab-register');
+           
+            if (type === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                tabLogin.classList.add('active');
+                tabReg.classList.remove('active');
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                tabLogin.classList.remove('active');
+                tabReg.classList.add('active');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const user = document.getElementById('reg-user').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+            const salary = parseFloat(document.getElementById('reg-salary').value);
+            const salaryType = document.getElementById('reg-salary-type').value;
+
+            if (state.users.find(u => u.username === user)) {
+                showToast('Username already exists', 'error');
+                return;
+            }
+
+            const newUser = {
+                username: user,
+                password: pass,
+                salary: salary || 0,
+                salaryType: salaryType || 'monthly',
+                expenses: [],
+                bonuses: []
+            };
+
+            state.users.push(newUser);
+            state.currentUser = newUser;
+            saveData();
+            showToast('Account created successfully!', 'success');
+            initApp();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const foundUser = state.users.find(u => u.username === user && u.password === pass);
+            if (foundUser) {
+                state.currentUser = foundUser;
+                saveData();
+                initApp();
+            } else {
+                showToast('Invalid credentials', 'error');
+            }
+        }
+
+        function logout() {
+            state.currentUser = null;
+            saveData();
+            location.reload();
+        }
+
+        function checkSession() {
+            if (state.currentUser && state.currentUser.username) {
+                const liveUser = state.users.find(u => u.username === state.currentUser.username);
+                if(liveUser) {
+                    state.currentUser = liveUser;
+                    initApp();
+                } else {
+                    state.currentUser = null;
+                }
+            }
+        }
+
+        // --- App Logic ---
+        function initApp() {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('app-view').classList.remove('hidden');
+            document.getElementById('display-username').textContent = state.currentUser.username;
+            document.getElementById('user-avatar').textContent = state.currentUser.username.charAt(0).toUpperCase();
+            navigate('dashboard');
+        }
+
+        function navigate(pageId) {
+            ['dashboard', 'expenses', 'reports', 'settings'].forEach(p => {
+                document.getElementById(`page-${p}`).classList.add('hidden');
+                const nav = document.getElementById(`nav-${p}`);
+                if(nav) nav.classList.remove('active');
+            });
+            const targetPage = document.getElementById(`page-${pageId}`);
+            const targetNav = document.getElementById(`nav-${pageId}`);
+            targetPage.classList.remove('hidden');
+            if(targetNav) targetNav.classList.add('active');
+
+            if (pageId === 'dashboard') updateDashboard();
+            if (pageId === 'expenses') renderExpenseTable();
+            if (pageId === 'reports') {
+                // Use requestAnimationFrame to ensure container size is calculated before render
+                requestAnimationFrame(() => {
+                    renderCharts();
+                });
+            }
+            if (pageId === 'settings') renderSettings();
+        }
+
+        // --- Income & Dashboard Logic ---
+        function getMonthlyIncome(year, month) {
+            const user = state.currentUser;
+            let baseSalary = user.salary || 0;
+
+            if (user.salaryType === 'annual') {
+                baseSalary = baseSalary / 12;
+            }
+
+            const monthlyBonuses = (user.bonuses || []).filter(b => {
+                const d = new Date(b.date);
+                return d.getMonth() === month && d.getFullYear() === year;
+            });
+           
+            const totalBonuses = monthlyBonuses.reduce((sum, b) => sum + parseFloat(b.amount), 0);
+
+            return {
+                salary: baseSalary,
+                bonuses: totalBonuses,
+                total: baseSalary + totalBonuses
+            };
+        }
+
+        function updateDashboard() {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            const incomeData = getMonthlyIncome(currentYear, currentMonth);
+            const totalIncome = incomeData.total;
+
+            const expenses = state.currentUser.expenses || [];
+            const monthlyExpenses = expenses.filter(e => {
+                const d = new Date(e.date);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+            });
+            const totalExpenses = monthlyExpenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
+            const netSavings = totalIncome - totalExpenses;
+
+            document.getElementById('dash-income').textContent = formatCurrency(totalIncome);
+            document.getElementById('dash-spent').textContent = formatCurrency(totalExpenses);
+           
+            const savingsEl = document.getElementById('dash-savings');
+            savingsEl.textContent = formatCurrency(netSavings);
+
+            if (netSavings < 0) {
+                savingsEl.style.color = 'var(--danger)';
+            } else {
+                savingsEl.style.color = 'var(--text-main)';
+            }
+
+            const subtext = state.currentUser.salaryType === 'annual'
+                ? `(Annual / 12) + Bonuses`
+                : `Monthly + Bonuses`;
+            document.getElementById('income-subtext').textContent = subtext;
+
+            const recent = [...expenses].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+            const tbody = document.querySelector('#recent-table tbody');
+            tbody.innerHTML = '';
+           
+            if (recent.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color:var(--text-secondary);">No recent transactions.</td></tr>';
+            } else {
+                recent.forEach(ex => {
+                    const formattedDate = new Date(ex.date).toLocaleDateString();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td><span class="category-badge" style="background:${getCatBg(ex.category)}; color:${getCatColor(ex.category)}">${ex.category}</span></td>
+                            <td>${ex.desc}</td>
+                            <td class="font-bold">${formatCurrency(ex.amount)}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // --- Settings & Bonus Logic ---
+        function renderSettings() {
+            const user = state.currentUser;
+            document.getElementById('settings-salary').value = user.salary;
+            document.getElementById('settings-salary-type').value = user.salaryType;
+
+            const tbody = document.querySelector('#bonus-table tbody');
+            tbody.innerHTML = '';
+            const bonuses = user.bonuses || [];
+            bonuses.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (bonuses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">No bonuses added yet.</td></tr>';
+            } else {
+                bonuses.forEach(b => {
+                    const formattedDate = new Date(b.date).toLocaleDateString();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td>${b.desc}</td>
+                            <td class="font-bold text-success">+${formatCurrency(b.amount)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteBonus('${b.id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function updateSalarySettings() {
+            const salary = parseFloat(document.getElementById('settings-salary').value);
+            const type = document.getElementById('settings-salary-type').value;
+            if (salary >= 0) {
+                state.currentUser.salary = salary;
+                state.currentUser.salaryType = type;
+                saveData();
+                showToast('Salary configuration updated', 'success');
+                if(!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
+            } else {
+                showToast('Invalid salary amount', 'error');
+            }
+        }
+
+        function openBonusModal() {
+            document.getElementById('bonus-modal').classList.remove('hidden');
+            document.getElementById('bonus-form').reset();
+            document.getElementById('bonus-date').valueAsDate = new Date();
+        }
+
+        function closeBonusModal() {
+            document.getElementById('bonus-modal').classList.add('hidden');
+        }
+
+        function handleBonusSubmit(e) {
+            e.preventDefault();
+            const desc = document.getElementById('bonus-desc').value;
+            const amount = parseFloat(document.getElementById('bonus-amount').value);
+            const date = document.getElementById('bonus-date').value;
+
+            const newBonus = { id: Date.now().toString(), desc, amount, date };
+            state.currentUser.bonuses.push(newBonus);
+            saveData();
+            showToast('Bonus added successfully', 'success');
+            closeBonusModal();
+            renderSettings();
+            if(!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
+        }
+
+        function deleteBonus(id) {
+            if(confirm("Are you sure you want to delete this bonus?")) {
+                state.currentUser.bonuses = state.currentUser.bonuses.filter(b => b.id !== id);
+                saveData();
+                renderSettings();
+                if(!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
+                showToast('Bonus deleted', 'success');
+            }
+        }
+
+        // --- Expense CRUD ---
+        function renderExpenseTable() {
+            const search = document.getElementById('search-expense').value.toLowerCase();
+            const filterDate = document.getElementById('filter-date').value;
+            let expenses = state.currentUser.expenses || [];
+            expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const tbody = document.querySelector('#full-table tbody');
+            tbody.innerHTML = '';
+
+            const filtered = expenses.filter(e => {
+                const textMatch = (e.desc && e.desc.toLowerCase().includes(search)) || (e.category && e.category.toLowerCase().includes(search));
+                let dateMatch = true;
+                if (filterDate) dateMatch = e.date === filterDate;
+                return textMatch && dateMatch;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">No expenses found matching your filters.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(ex => {
+                const formattedDate = new Date(ex.date).toLocaleDateString();
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${formattedDate}</td>
+                        <td><span class="category-badge" style="background:${getCatBg(ex.category)}; color:${getCatColor(ex.category)}">${ex.category}</span></td>
+                        <td>${ex.desc}</td>
+                        <td class="font-bold">${formatCurrency(ex.amount)}</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <button class="btn btn-outline btn-sm" onclick="editExpense('${ex.id}')">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteExpense('${ex.id}')">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('expense-modal').classList.add('hidden');
+        }
+
+        function openModal(editId = null) {
+            const modal = document.getElementById('expense-modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('expense-form');
+            modal.classList.remove('hidden');
+           
+            if (editId) {
+                const ex = state.currentUser.expenses.find(e => e.id === editId);
+                if (ex) {
+                    document.getElementById('edit-id').value = ex.id;
+                    document.getElementById('exp-desc').value = ex.desc;
+                    document.getElementById('exp-amount').value = ex.amount;
+                    document.getElementById('exp-date').value = ex.date;
+                    document.getElementById('exp-category').value = ex.category;
+                    title.textContent = "Edit Expense";
+                }
+            } else {
+                document.getElementById('edit-id').value = '';
+                document.getElementById('exp-desc').value = '';
+                document.getElementById('exp-amount').value = '';
+                document.getElementById('exp-date').valueAsDate = new Date();
+                document.getElementById('exp-category').value = '';
+                title.textContent = "Add Expense";
+            }
+        }
+
+        function handleExpenseSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const desc = document.getElementById('exp-desc').value;
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            const date = document.getElementById('exp-date').value;
+            const category = document.getElementById('exp-category').value;
+
+            if (id) {
+                const idx = state.currentUser.expenses.findIndex(e => e.id === id);
+                if (idx !== -1) {
+                    state.currentUser.expenses[idx] = { ...state.currentUser.expenses[idx], desc, amount, date, category };
+                }
+            } else {
+                const newExpense = { id: Date.now().toString(), desc, amount, date, category };
+                state.currentUser.expenses.push(newExpense);
+            }
+
+            saveData();
+            showToast('Expense saved successfully', 'success');
+            closeModal();
+            if (!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
+            else if (!document.getElementById('page-expenses').classList.contains('hidden')) renderExpenseTable();
+        }
+
+        function deleteExpense(id) {
+            if(confirm("Are you sure you want to delete this expense?")) {
+                state.currentUser.expenses = state.currentUser.expenses.filter(e => e.id !== id);
+                saveData();
+                renderExpenseTable();
+                showToast('Expense deleted', 'success');
+            }
+        }
+
+        function editExpense(id) { openModal(id); }
+
+        function generateReport() {
+            const expenses = state.currentUser.expenses;
+            let report = "MONTHLY EXPENSE REPORT\n----------------------\n\n";
+            expenses.forEach(e => {
+                report += `${e.date} | ${e.category.padEnd(15)} | ${e.desc.padEnd(20)} | $${e.amount}\n`;
+            });
+            const total = expenses.reduce((s,e)=>s+parseFloat(e.amount),0);
+            report += `\nTotal Expenses: $${total.toFixed(2)}`;
+            alert(report);
+            showToast('Report generated', 'success');
+        }
+
+        // --- CHART.JS IMPLEMENTATION ---
+        function renderCharts() {
+            // Prepare Data for Pie Chart (Category Distribution)
+            const expenses = state.currentUser.expenses || [];
+            const categoryData = {};
+            expenses.forEach(e => {
+                const amount = parseFloat(e.amount);
+                categoryData[e.category] = (categoryData[e.category] || 0) + amount;
+            });
+
+            const pieLabels = Object.keys(categoryData);
+            const pieValues = Object.values(categoryData);
+            // Generate background colors dynamically based on category names
+            const pieBackgroundColors = pieLabels.map(cat => getCatColor(cat));
+            const pieBorderColors = pieLabels.map(cat => '#ffffff');
+
+            // Destroy existing pie chart if it exists to prevent overlap
+            if (pieChartInstance) {
+                pieChartInstance.destroy();
+            }
+
+            // Create Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChartInstance = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieValues,
+                        backgroundColor: pieBackgroundColors,
+                        borderColor: pieBorderColors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: false, // Set as requested
+                    maintainAspectRatio: false, // Set as requested
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { family: "'Inter', sans-serif" }
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Prepare Data for Bar Chart (Annual Trend)
+            const currentYear = new Date().getFullYear();
+            const monthlyLabels = [];
+            const monthlyValues = [];
+           
+            // Initialize 12 months
+            for (let i = 0; i < 12; i++) {
+                const dateObj = new Date(currentYear, i, 1);
+                monthlyLabels.push(dateObj.toLocaleString('default', { month: 'short' }));
+                monthlyValues.push(0);
+            }
+
+            // Aggregate data
+            expenses.forEach(e => {
+                const d = new Date(e.date);
+                if (!isNaN(d) && d.getFullYear() === currentYear) {
+                    monthlyValues[d.getMonth()] += parseFloat(e.amount);
+                }
+            });
+
+            // Destroy existing bar chart if it exists
+            if (barChartInstance) {
+                barChartInstance.destroy();
+            }
+
+            // Create Bar Chart
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChartInstance = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: 'Spending',
+                        data: monthlyValues,
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: false, // Set as requested
+                    maintainAspectRatio: false, // Set as requested
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#f1f5f9'
+                            },
+                            ticks: {
+                                font: { family: "'Inter', sans-serif" }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { family: "'Inter', sans-serif" }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Helpers ---
+        function formatCurrency(amount) { return '$' + parseFloat(amount).toFixed(2); }
+
+        // Dynamic color generation for categories
+        function getCatColor(cat) {
+            const presets = {
+                'Food': '#ef4444',
+                'Transport': '#f59e0b',
+                'Education': '#3b82f6',
+                'Entertainment': '#8b5cf6',
+                'Utilities': '#10b981',
+                'Shopping': '#ec4899',
+                'Health': '#14b8a6',
+                'Other': '#64748b'
+            };
+           
+            if (presets[cat]) return presets[cat];
+           
+            // Generate a consistent color from the category string for new categories
+            let hash = 0;
+            for (let i = 0; i < cat.length; i++) {
+                hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            return '#' + "00000".substring(0, 6 - c.length) + c;
+        }
+
+        // Dynamic background color generation
+        function getCatBg(cat) {
+            const presets = {
+                'Food': '#fef2f2',
+                'Transport': '#fffbeb',
+                'Education': '#eff6ff',
+                'Entertainment': '#f5f3ff',
+                'Utilities': '#ecfdf5',
+                'Shopping': '#fdf2f8',
+                'Health': '#f0fdfa',
+                'Other': '#f1f5f9'
+            };
+           
+            if (presets[cat]) return presets[cat];
+
+            // For new categories, use HSL to ensure it's light enough
+            let hash = 0;
+            for (let i = 0; i < cat.length; i++) {
+                hash = cat.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const h = Math.abs(hash) % 360;
+            return `hsl(${h}, 70%, 95%)`;
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = type === 'success'
+                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--success')}" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ${message}`
+                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger')}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
