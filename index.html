@@ -1255,7 +1255,7 @@ updateDashboard();
             return dateObj.getFullYear() === y && dateObj.getMonth() === m - 1 && dateObj.getDate() === d;
         }
 
-        function handleExpenseSubmit(e) {
+       async function handleExpenseSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const desc = document.getElementById('exp-desc').value;
