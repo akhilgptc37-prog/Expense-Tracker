@@ -774,15 +774,9 @@
             </form>
         </div>
     </div>
-    <!-- Supabase Library -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- JavaScript Logic -->
     <script>
-        // Supabase connection
-const supabaseUrl = "https://ymciqpprnxyjarkqncgv.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltY2lxcHBybnh5amFya3FuY2d2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNjU2MTMsImV4cCI6MjA4ODY0MTYxM30.QDnzLbFZsggyv_q3gpgFyhzKq_R5YkQ1oqZp8MEYe-g";
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         // Register the DataLabels plugin globally
         Chart.register(ChartDataLabels);
 
@@ -796,7 +790,6 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             checkSession();
-             loadExpenses();
             // Set default date for expense input to today in DD/MM/YYYY
             document.getElementById('exp-date').value = getTodayDateDMY();
             document.getElementById('bonus-date').value = getTodayDateDMY();
@@ -808,7 +801,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const year = today.getFullYear();
-            return `${day}/${month}/${year}`;
+            return ${day}/${month}/${year};
         }
 
         function ensureStateStructure() {
@@ -868,54 +861,47 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             }
         }
 
-    async function handleRegister(e) {
-    e.preventDefault();
+        function handleRegister(e) {
+            e.preventDefault();
+            const user = document.getElementById('reg-user').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
+            const salary = parseFloat(document.getElementById('reg-salary').value);
+            const salaryType = document.getElementById('reg-salary-type').value;
 
-    const user = document.getElementById('reg-user').value.trim();
-    const pass = document.getElementById('reg-pass').value.trim();
-    const salary = parseFloat(document.getElementById('reg-salary').value);
-    const salaryType = document.getElementById('reg-salary-type').value;
+            if (state.users.find(u => u.username === user)) {
+                showToast('Username already exists', 'error');
+                return;
+            }
 
-    const { data, error } = await supabaseClient
-    .from("users")
-    .insert([
-    {
-    username: user,
-    password: pass,
-    salary: salary,
-    salary_type: salaryType
-    }
-    ]);
+            const newUser = {
+                username: user,
+                password: pass,
+                salary: salary || 0,
+                salaryType: salaryType || 'monthly',
+                expenses: [],
+                bonuses: []
+            };
 
-    if(error){
-    showToast("Registration failed","error");
-    return;
-    }
-
-    showToast("Account created successfully","success");
-    }
-
-       async function handleLogin(e){
-        e.preventDefault();
-
-        const user = document.getElementById('login-user').value.trim();
-        const pass = document.getElementById('login-pass').value.trim();
-
-        const { data, error } = await supabaseClient
-        .from("users")
-        .select("*")
-        .eq("username", user)
-        .eq("password", pass);
-
-        if(data.length > 0){
-        showToast("Login successful","success");
-        state.currentUser = data[0];
-        initApp();
-        loadExpenses();
-        }else{
-        showToast("Invalid credentials","error");
+            state.users.push(newUser);
+            state.currentUser = newUser;
+            saveData();
+            showToast('Account created successfully!', 'success');
+            initApp();
         }
-    }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const foundUser = state.users.find(u => u.username === user && u.password === pass);
+            if (foundUser) {
+                state.currentUser = foundUser;
+                saveData();
+                initApp();
+            } else {
+                showToast('Invalid credentials', 'error');
+            }
+        }
 
         function logout() {
             state.currentUser = null;
@@ -946,12 +932,12 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         function navigate(pageId) {
             ['dashboard', 'expenses', 'reports', 'settings'].forEach(p => {
-                document.getElementById(`page-${p}`).classList.add('hidden');
-                const nav = document.getElementById(`nav-${p}`);
+                document.getElementById(page-${p}).classList.add('hidden');
+                const nav = document.getElementById(nav-${p});
                 if(nav) nav.classList.remove('active');
             });
-            const targetPage = document.getElementById(`page-${pageId}`);
-            const targetNav = document.getElementById(`nav-${pageId}`);
+            const targetPage = document.getElementById(page-${pageId});
+            const targetNav = document.getElementById(nav-${pageId});
             targetPage.classList.remove('hidden');
             if(targetNav) targetNav.classList.add('active');
 
@@ -988,7 +974,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             const day = String(dateObj.getDate()).padStart(2, '0');
             const month = String(dateObj.getMonth() + 1).padStart(2, '0');
             const year = dateObj.getFullYear();
-            return `${day}/${month}/${year}`;
+            return ${day}/${month}/${year};
         }
 
         function updateDashboard() {
@@ -1029,7 +1015,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             // Card 1: Annual Income
             document.getElementById('dash-income').textContent = formatCurrency(annualSalary);
             document.getElementById('income-breakdown').innerHTML =
-                `<span>Monthly Avg: <b>${formatCurrency(monthlySalaryAvg)}</b></span> | <span>Bonus (Year): <b>${formatCurrency(totalBonusesYear)}</b></span>`;
+                <span>Monthly Avg: <b>${formatCurrency(monthlySalaryAvg)}</b></span> | <span>Bonus (Year): <b>${formatCurrency(totalBonusesYear)}</b></span>;
 
             // Card 2: Annual Expenses
             document.getElementById('dash-spent').textContent = formatCurrency(annualExpenses);
@@ -1053,14 +1039,14 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color:var(--text-secondary);">No recent transactions.</td></tr>';
             } else {
                 recent.forEach(ex => {
-                    tbody.innerHTML += `
+                    tbody.innerHTML += 
                         <tr>
                             <td>${ex.date}</td>
                             <td><span class="category-badge" style="background:${getCatBg(ex.category)}; color:${getCatColor(ex.category)}">${ex.category}</span></td>
                             <td>${ex.desc}</td>
                             <td class="font-bold">${formatCurrency(ex.amount)}</td>
                         </tr>
-                    `;
+                    ;
                 });
             }
         }
@@ -1080,7 +1066,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">No bonuses added yet.</td></tr>';
             } else {
                 bonuses.forEach(b => {
-                    tbody.innerHTML += `
+                    tbody.innerHTML += 
                         <tr>
                             <td>${b.date}</td>
                             <td>${b.desc}</td>
@@ -1089,7 +1075,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                                 <button class="btn btn-sm btn-danger" onclick="deleteBonus('${b.id}')">Delete</button>
                             </td>
                         </tr>
-                    `;
+                    ;
                 });
             }
         }
@@ -1154,32 +1140,9 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         }
 
         // --- Expense CRUD ---
-        async function loadExpenses() {
-
-        const { data, error } = await supabaseClient
-        .from("expenses")
-        .select("*");
-        .eq("user_id", state.currentUser.id);
-        if(error){
-        console.log(error);
-        return;
-        }
-
-        state.currentUser.expenses = data;
-        renderExpenseTable();
-        updateDashboard();
-
-        }
-
-            if(error){
-            console.log(error);
-            return;
-        }
-
-        expenses = data;
-        updateUI();
-
-        }
+        function renderExpenseTable() {
+            const search = document.getElementById('search-expense').value.toLowerCase();
+            let expenses = state.currentUser.expenses || [];
             expenses.sort((a, b) => parseDateDMY(b.date) - parseDateDMY(a.date));
 
             const tbody = document.querySelector('#full-table tbody');
@@ -1196,7 +1159,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             }
 
             filtered.forEach(ex => {
-                tbody.innerHTML += `
+                tbody.innerHTML += 
                     <tr>
                         <td>${ex.date}</td>
                         <td><span class="category-badge" style="background:${getCatBg(ex.category)}; color:${getCatColor(ex.category)}">${ex.category}</span></td>
@@ -1209,7 +1172,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                             </div>
                         </td>
                     </tr>
-                `;
+                ;
             });
         }
 
@@ -1256,7 +1219,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             return dateObj.getFullYear() === y && dateObj.getMonth() === m - 1 && dateObj.getDate() === d;
         }
 
-       async function handleExpenseSubmit(e) {
+        function handleExpenseSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const desc = document.getElementById('exp-desc').value;
@@ -1281,17 +1244,6 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             }
 
             saveData();
-            await supabaseClient
-            .from("expenses")
-            .insert([
-            {
-            user_id: state.currentUser.id,
-            desc: desc,
-            amount: amount,
-            date: date,
-            category: category
-            }
-            ]);
             showToast('Expense saved successfully', 'success');
             closeModal();
             if (!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
@@ -1313,10 +1265,10 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             const expenses = state.currentUser.expenses;
             let report = "EXPENSE REPORT\n----------------------\n\n";
             expenses.forEach(e => {
-                report += `${e.date} | ${e.category.padEnd(15)} | ${e.desc.padEnd(20)} | ${formatCurrency(e.amount)}\n`;
+                report += ${e.date} | ${e.category.padEnd(15)} | ${e.desc.padEnd(20)} | ${formatCurrency(e.amount)}\n;
             });
             const total = expenses.reduce((s,e)=>s+parseFloat(e.amount),0);
-            report += `\nTotal Expenses: ${formatCurrency(total)}`;
+            report += \nTotal Expenses: ${formatCurrency(total)};
             alert(report);
             showToast('Report generated', 'success');
         }
@@ -1482,16 +1434,16 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             let hash = 0;
             for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
             const h = Math.abs(hash) % 360;
-            return `hsl(${h}, 70%, 95%)`;
+            return hsl(${h}, 70%, 95%);
         }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
+            toast.className = toast ${type};
             toast.innerHTML = type === 'success'
-                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--success')}" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ${message}`
-                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger')}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ${message}`;
+                ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--success')}" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ${message}
+                : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger')}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ${message};
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.animation = 'slideInRight 0.3s reverse forwards';
