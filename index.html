@@ -896,25 +896,25 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     }
 
        async function handleLogin(e){
-e.preventDefault();
+        e.preventDefault();
 
-const user = document.getElementById('login-user').value.trim();
-const pass = document.getElementById('login-pass').value.trim();
+        const user = document.getElementById('login-user').value.trim();
+        const pass = document.getElementById('login-pass').value.trim();
 
-const { data, error } = await supabaseClient
-.from("users")
-.select("*")
-.eq("username", user)
-.eq("password", pass);
+        const { data, error } = await supabaseClient
+        .from("users")
+        .select("*")
+        .eq("username", user)
+        .eq("password", pass);
 
-if(data.length > 0){
-showToast("Login successful","success");
-state.currentUser = data[0];
-initApp();
-}else{
-showToast("Invalid credentials","error");
-}
-}
+        if(data.length > 0){
+        showToast("Login successful","success");
+        state.currentUser = data[0];
+        initApp();
+        }else{
+        showToast("Invalid credentials","error");
+        }
+    }
 
         function logout() {
             state.currentUser = null;
@@ -1155,20 +1155,20 @@ showToast("Invalid credentials","error");
         // --- Expense CRUD ---
         async function loadExpenses() {
 
-const { data, error } = await supabaseClient
-.from("expenses")
-.select("*");
+        const { data, error } = await supabaseClient
+        .from("expenses")
+        .select("*");
+        .eq("user_id", state.currentUser.id);
+        if(error){
+        console.log(error);
+        return;
+        }
 
-if(error){
-console.log(error);
-return;
-}
+        state.currentUser.expenses = data;
+        renderExpenseTable();
+        updateDashboard();
 
-state.currentUser.expenses = data;
-renderExpenseTable();
-updateDashboard();
-
-}
+        }
 
             if(error){
             console.log(error);
