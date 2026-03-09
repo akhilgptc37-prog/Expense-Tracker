@@ -1155,6 +1155,21 @@ showToast("Invalid credentials","error");
         function renderExpenseTable() {
             const search = document.getElementById('search-expense').value.toLowerCase();
             let expenses = state.currentUser.expenses || [];
+            async function loadExpenses() {
+
+            const { data, error } = await supabaseClient
+            .from("expenses")
+            .select("*");
+
+            if(error){
+            console.log(error);
+            return;
+        }
+
+        expenses = data;
+        updateUI();
+
+        }
             expenses.sort((a, b) => parseDateDMY(b.date) - parseDateDMY(a.date));
 
             const tbody = document.querySelector('#full-table tbody');
