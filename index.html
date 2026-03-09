@@ -867,33 +867,32 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
             }
         }
 
-        function handleRegister(e) {
-            e.preventDefault();
-            const user = document.getElementById('reg-user').value.trim();
-            const pass = document.getElementById('reg-pass').value.trim();
-            const salary = parseFloat(document.getElementById('reg-salary').value);
-            const salaryType = document.getElementById('reg-salary-type').value;
+    async function handleRegister(e) {
+    e.preventDefault();
 
-            if (state.users.find(u => u.username === user)) {
-                showToast('Username already exists', 'error');
-                return;
-            }
+    const user = document.getElementById('reg-user').value.trim();
+    const pass = document.getElementById('reg-pass').value.trim();
+    const salary = parseFloat(document.getElementById('reg-salary').value);
+    const salaryType = document.getElementById('reg-salary-type').value;
 
-            const newUser = {
-                username: user,
-                password: pass,
-                salary: salary || 0,
-                salaryType: salaryType || 'monthly',
-                expenses: [],
-                bonuses: []
-            };
+    const { data, error } = await supabaseClient
+    .from("users")
+    .insert([
+    {
+    username: user,
+    password: pass,
+    salary: salary,
+    salary_type: salaryType
+    }
+    ]);
 
-            state.users.push(newUser);
-            state.currentUser = newUser;
-            saveData();
-            showToast('Account created successfully!', 'success');
-            initApp();
-        }
+    if(error){
+    showToast("Registration failed","error");
+    return;
+    }
+
+    showToast("Account created successfully","success");
+    }
 
         function handleLogin(e) {
             e.preventDefault();
