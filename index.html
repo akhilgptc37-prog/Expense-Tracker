@@ -796,6 +796,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         window.addEventListener('DOMContentLoaded', () => {
             loadData();
             checkSession();
+             loadExpenses();
             // Set default date for expense input to today in DD/MM/YYYY
             document.getElementById('exp-date').value = getTodayDateDMY();
             document.getElementById('bonus-date').value = getTodayDateDMY();
@@ -1152,14 +1153,22 @@ showToast("Invalid credentials","error");
         }
 
         // --- Expense CRUD ---
-        function renderExpenseTable() {
-            const search = document.getElementById('search-expense').value.toLowerCase();
-            let expenses = state.currentUser.expenses || [];
-            async function loadExpenses() {
+        async function loadExpenses() {
 
-            const { data, error } = await supabaseClient
-            .from("expenses")
-            .select("*");
+const { data, error } = await supabaseClient
+.from("expenses")
+.select("*");
+
+if(error){
+console.log(error);
+return;
+}
+
+state.currentUser.expenses = data;
+renderExpenseTable();
+updateDashboard();
+
+}
 
             if(error){
             console.log(error);
