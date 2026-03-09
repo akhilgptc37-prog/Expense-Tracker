@@ -911,6 +911,7 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
         showToast("Login successful","success");
         state.currentUser = data[0];
         initApp();
+        loadExpenses();
         }else{
         showToast("Invalid credentials","error");
         }
