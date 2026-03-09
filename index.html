@@ -894,19 +894,26 @@ const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
     showToast("Account created successfully","success");
     }
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('login-user').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-            const foundUser = state.users.find(u => u.username === user && u.password === pass);
-            if (foundUser) {
-                state.currentUser = foundUser;
-                saveData();
-                initApp();
-            } else {
-                showToast('Invalid credentials', 'error');
-            }
-        }
+       async function handleLogin(e){
+e.preventDefault();
+
+const user = document.getElementById('login-user').value.trim();
+const pass = document.getElementById('login-pass').value.trim();
+
+const { data, error } = await supabaseClient
+.from("users")
+.select("*")
+.eq("username", user)
+.eq("password", pass);
+
+if(data.length > 0){
+showToast("Login successful","success");
+state.currentUser = data[0];
+initApp();
+}else{
+showToast("Invalid credentials","error");
+}
+}
 
         function logout() {
             state.currentUser = null;
