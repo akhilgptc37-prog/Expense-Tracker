@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -961,21 +962,33 @@
             showToast('Account created successfully!', 'success');
             initApp();
         }
+        async function handleLogin(e){
+        e.preventDefault()
 
-        function handleLogin(e) {
-            e.preventDefault();
-            const user = document.getElementById('login-user').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-            const foundUser = state.users.find(u => u.username === user && u.password === pass);
-            if (foundUser) {
-                state.currentUser = foundUser;
-                saveData();
-                initApp();
-            } else {
-                showToast('Invalid credentials', 'error');
-            }
-        }
+        const user = document.getElementById("login-user").value
+        const pass = document.getElementById("login-pass").value
 
+        const res = await fetch("https://yourusername.pythonanywhere.com/login",{
+        method:"POST",
+        headers:{
+        "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+        username:user,
+        password:pass
+    })
+})
+
+    const data = await res.json()
+
+    if(data.status=="success"){
+    alert("Login success")
+    }
+    else{
+    alert("Invalid login")
+    }
+}
+        
         function logout() {
             state.currentUser = null;
             saveData();
