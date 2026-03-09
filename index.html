@@ -1284,11 +1284,11 @@ updateDashboard();
             .from("expenses")
             .insert([
             {
-                user_id: state.currentUser.id,
-                desc: desc,
-                amount: amount,
-                date: date,
-                category: category
+            user_id: state.currentUser.id,
+            desc: desc,
+            amount: amount,
+            date: date,
+            category: category
             }
             ]);
             showToast('Expense saved successfully', 'success');
