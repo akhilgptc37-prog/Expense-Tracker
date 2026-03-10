@@ -391,8 +391,23 @@
                 window._bonuses = [];
                 window._uid = null;
 
+                // Reset button states so spinner doesn't get stuck
+                const loginBtn = document.getElementById('login-btn');
+                const registerBtn = document.getElementById('register-btn');
+                loginBtn.innerHTML = 'Sign In';
+                loginBtn.disabled = false;
+                registerBtn.innerHTML = 'Create Account';
+                registerBtn.disabled = false;
+
+                // Reset form fields
+                document.getElementById('login-user').value = '';
+                document.getElementById('login-pass').value = '';
+
                 document.getElementById('auth-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('hidden');
+
+                // Make sure login tab is shown by default
+                switchAuth('login');
             }
         });
 
