@@ -121,7 +121,6 @@
         @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @media (max-width: 1024px) { .charts-container { grid-template-columns: 1fr; } }
         @media (max-width: 768px) { #app-view { flex-direction: column; } aside { width: 100%; height: auto; padding: 1rem; flex-direction: row; justify-content: space-between; border-right: none; border-bottom: 1px solid var(--border); } .nav-menu { display: none; } .sidebar-logo { padding: 0; margin-bottom: 0; } .user-profile { border-top: none; padding-top: 0; margin-top: 0; } .nav-label { display: none; } .auth-card { margin: 1rem; padding: 1.5rem; } .bg-shape { display: none; } }
-        /* Loading spinner */
         .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -351,7 +350,6 @@
             collection, addDoc, getDocs, deleteDoc, query, orderBy
         } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // ✅ YOUR FIREBASE CONFIG — already filled in!
         const firebaseConfig = {
             apiKey: "AIzaSyAQvkYBfCqPw1zJB1G0JGEqwLCZXeDhkSA",
             authDomain: "expense-tracker-a2d96.firebaseapp.com",
@@ -365,7 +363,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // ── Expose to global scope so other functions can use them ──
         window._auth = auth;
         window._db = db;
         window._fb = {
@@ -376,18 +373,29 @@
             collection, addDoc, getDocs, deleteDoc, query, orderBy
         };
 
-        // ── Listen for login/logout automatically ──
+        // ── FIX: await loadUserData BEFORE calling initApp so data is ready ──
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                await loadUserData(user.uid);
-                initApp();
+                // Clear any stale data from a previous session first
+                window._profile = null;
+                window._expenses = [];
+                window._bonuses = [];
+                window._uid = null;
+
+                await loadUserData(user.uid);  // wait for ALL data to load
+                initApp();                      // only then show the dashboard
             } else {
+                // User logged out — clear globals so next user starts fresh
+                window._profile = null;
+                window._expenses = [];
+                window._bonuses = [];
+                window._uid = null;
+
                 document.getElementById('auth-view').classList.remove('hidden');
                 document.getElementById('app-view').classList.add('hidden');
             }
         });
 
-        // ── Load user profile + expenses + bonuses from Firestore ──
         async function loadUserData(uid) {
             const { doc, getDoc, collection, getDocs } = window._fb;
 
@@ -450,21 +458,15 @@
 
             try {
                 const { createUserWithEmailAndPassword, doc, setDoc } = window._fb;
-                // Firebase needs an email — we create a fake one from the username
                 const fakeEmail = username.toLowerCase().replace(/\s/g,'_') + '@expensetracker.app';
                 const userCred = await createUserWithEmailAndPassword(window._auth, fakeEmail, password);
                 const uid = userCred.user.uid;
 
-                // Save profile to Firestore
                 await setDoc(doc(window._db, "users", uid, "profile", "info"), {
                     username, salary: salary || 0, salaryType
                 });
 
-                window._profile = { username, salary: salary || 0, salaryType };
-                window._uid = uid;
-                window._expenses = [];
-                window._bonuses = [];
-
+                // onAuthStateChanged will fire automatically and call loadUserData + initApp
                 showToast('Account created successfully! 🎉', 'success');
             } catch (err) {
                 showToast(friendlyError(err.code), 'error');
@@ -487,7 +489,7 @@
                 const { signInWithEmailAndPassword } = window._fb;
                 const fakeEmail = username.toLowerCase().replace(/\s/g,'_') + '@expensetracker.app';
                 await signInWithEmailAndPassword(window._auth, fakeEmail, password);
-                // onAuthStateChanged will handle the rest
+                // onAuthStateChanged handles the rest — loads fresh data then shows app
             } catch (err) {
                 showToast(friendlyError(err.code), 'error');
                 btn.innerHTML = 'Sign In';
@@ -497,7 +499,11 @@
 
         // ── LOGOUT ──
         async function logout() {
+            // Destroy charts before clearing state to avoid stale canvas errors
+            if (pieChartInstance) { pieChartInstance.destroy(); pieChartInstance = null; }
+            if (barChartInstance) { barChartInstance.destroy(); barChartInstance = null; }
             await window._fb.signOut(window._auth);
+            // onAuthStateChanged will clear globals and show auth screen
         }
 
         // ── INIT APP after login ──
@@ -539,12 +545,10 @@
             const { collection, addDoc, doc, updateDoc } = window._fb;
 
             if (id) {
-                // Edit existing
                 await updateDoc(doc(window._db, "users", window._uid, "expenses", id), { desc, amount, date, category });
                 const idx = window._expenses.findIndex(e => e.id === id);
                 if(idx !== -1) window._expenses[idx] = { id, desc, amount, date, category };
             } else {
-                // Add new
                 const docRef = await addDoc(collection(window._db, "users", window._uid, "expenses"), { desc, amount, date, category });
                 window._expenses.push({ id: docRef.id, desc, amount, date, category });
             }
