@@ -1,61 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Expense | Smart Expense Tracker</title>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Data Labels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-   
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-   
     <style>
-        /* --- CSS Variables & Reset (Blue Theme) --- */
         :root {
-            --primary: #2563eb;         /* Blue 600 */
-            --primary-hover: #1d4ed8;   /* Blue 700 */
-            --primary-light: #dbeafe;   /* Blue 100 */
-           
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
             --bg-body: #f8fafc;
-            --bg-sidebar: #0f172a;      /* Slate 900 */
+            --bg-sidebar: #0f172a;
             --bg-card: #ffffff;
-           
             --text-main: #1e293b;
             --text-secondary: #64748b;
             --text-sidebar: #94a3b8;
             --text-sidebar-hover: #f8fafc;
-
             --border: #e2e8f0;
-           
             --danger: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
-
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-
             --radius: 12px;
             --radius-sm: 8px;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased; }
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -69,30 +46,9 @@
         .font-bold { font-weight: 600; }
         .text-danger { color: var(--danger); }
         .text-success { color: var(--success); }
-
-        /* --- UI Elements --- */
-        .btn {
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .btn-primary { 
-            background: linear-gradient(135deg, #2563eb, #3b82f6); 
-            color: white; 
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); 
-        }
-        .btn-primary:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); 
-        }
+        .btn { padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); }
         .btn-outline { background: white; border: 1px solid var(--border); color: var(--text-main); }
         .btn-outline:hover { background: var(--bg-body); border-color: #cbd5e1; }
         .btn-danger { background: #fee2e2; color: var(--danger); }
@@ -100,414 +56,82 @@
         .btn-ghost { background: transparent; color: var(--text-secondary); }
         .btn-ghost:hover { background: rgba(0,0,0,0.05); color: var(--text-main); }
         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
-
-        input, select {
-            padding: 0.7rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            width: 100%;
-            margin-bottom: 0.8rem;
-            font-size: 0.95rem;
-            background: white;
-            color: var(--text-main);
-            transition: all 0.2s;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 0.4rem;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* --- Attractive Auth Screen --- */
-        #auth-view {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%);
-        }
-
-        /* Animated Background Shapes */
-        .bg-shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.6;
-            animation: float 10s infinite alternate;
-        }
+        input, select { padding: 0.7rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); width: 100%; margin-bottom: 0.8rem; font-size: 0.95rem; background: white; color: var(--text-main); transition: all 0.2s; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+        #auth-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%); }
+        .bg-shape { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.6; animation: float 10s infinite alternate; }
         .shape-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: rgba(251, 191, 36, 0.5); animation-delay: 0s; }
         .shape-2 { bottom: -10%; right: -5%; width: 500px; height: 500px; background: rgba(236, 72, 153, 0.4); animation-delay: 2s; }
         .shape-3 { top: 40%; left: 60%; width: 300px; height: 300px; background: rgba(16, 185, 129, 0.5); animation-delay: 4s; }
         .shape-4 { bottom: 20%; left: 10%; width: 250px; height: 250px; background: rgba(139, 92, 246, 0.5); animation-delay: 1s; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 50px) scale(1.1); }
-        }
-
-        .auth-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 2.5rem;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255,255,255,0.5);
-            z-index: 10;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        
-        .auth-card:hover {
-            transform: translateY(-5px);
-        }
-
-        /* Decorative top border for the card */
-        .auth-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 6px;
-            background: linear-gradient(90deg, #2563eb, #0ea5e9, #10b981);
-        }
-
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
+        .auth-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); padding: 2.5rem; border-radius: 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); border: 1px solid rgba(255,255,255,0.5); z-index: 10; position: relative; overflow: hidden; transition: transform 0.3s ease; }
+        .auth-card:hover { transform: translateY(-5px); }
+        .auth-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: linear-gradient(90deg, #2563eb, #0ea5e9, #10b981); }
         .auth-header { text-align: center; margin-bottom: 2rem; }
-        .auth-logo {
-            width: 60px; height: 60px;
-            background: linear-gradient(135deg, #2563eb, #0ea5e9);
-            border-radius: 16px;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin-bottom: 1.2rem;
-            box-shadow: 0 10px 15px rgba(37, 99, 235, 0.25);
-            position: relative;
-        }
-        
-        /* Little decorative dots on logo */
-        .auth-logo::after {
-            content: '';
-            position: absolute;
-            width: 12px; height: 12px;
-            background: #10b981;
-            border-radius: 50%;
-            border: 2px solid white;
-            top: -4px; right: -4px;
-        }
-
-        .auth-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .auth-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-
-        .auth-tabs {
-            display: flex;
-            background: #f1f5f9;
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            border: 1px solid #e2e8f0;
-        }
-        .auth-tab {
-            flex: 1;
-            padding: 0.6rem;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .auth-tab.active { 
-            background: white; 
-            color: var(--primary); 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.025); 
-        }
-
-        /* --- App Layout --- */
+        .auth-logo { width: 60px; height: 60px; background: linear-gradient(135deg, #2563eb, #0ea5e9); border-radius: 16px; color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 1.2rem; box-shadow: 0 10px 15px rgba(37, 99, 235, 0.25); position: relative; }
+        .auth-logo::after { content: ''; position: absolute; width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 2px solid white; top: -4px; right: -4px; }
+        .auth-title { font-size: 1.6rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        .auth-subtitle { color: var(--text-secondary); font-size: 0.95rem; }
+        .auth-tabs { display: flex; background: #f1f5f9; padding: 4px; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; }
+        .auth-tab { flex: 1; padding: 0.6rem; text-align: center; cursor: pointer; border-radius: 8px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600; transition: all 0.3s; }
+        .auth-tab.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.025); }
         #app-view { display: flex; height: 100vh; }
-        aside {
-            width: 260px;
-            background: var(--bg-sidebar);
-            color: var(--text-sidebar);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem 1rem;
-            flex-shrink: 0;
-            border-right: 1px solid rgba(255,255,255,0.05);
-        }
-        .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0 0.5rem 2rem 0.5rem;
-            color: white;
-            font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: -0.025em;
-        }
+        aside { width: 260px; background: var(--bg-sidebar); color: var(--text-sidebar); display: flex; flex-direction: column; padding: 1.5rem 1rem; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-logo { display: flex; align-items: center; gap: 0.75rem; padding: 0 0.5rem 2rem 0.5rem; color: white; font-weight: 700; font-size: 1.2rem; letter-spacing: -0.025em; }
         .nav-group { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 2rem; }
-        .nav-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-sidebar);
-            margin: 0 0.75rem 0.5rem 0.75rem;
-            opacity: 0.7;
-        }
-        .nav-item {
-            padding: 0.6rem 0.75rem;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
+        .nav-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-sidebar); margin: 0 0.75rem 0.5rem 0.75rem; opacity: 0.7; }
+        .nav-item { padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; font-size: 0.9rem; font-weight: 500; }
         .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-sidebar-hover); }
         .nav-item.active { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
         .nav-icon { opacity: 0.7; width: 18px; text-align: center; }
-       
-        .user-profile {
-            margin-top: auto;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .user-avatar {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            border-radius: 8px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        main {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            background: var(--bg-body);
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
+        .user-profile { margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 0.75rem; }
+        .user-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), #3b82f6); border-radius: 8px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; }
+        main { flex: 1; overflow-y: auto; padding: 2rem; background: var(--bg-body); }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         h1, h2 { letter-spacing: -0.02em; }
         h2 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
-
-        /* Dashboard Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: var(--bg-card);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
         .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
-        .stat-icon {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            background: var(--primary-light);
-            color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-        }
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0.25rem 0;
-            color: var(--text-main);
-        }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; margin: 0.25rem 0; color: var(--text-main); }
         .stat-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
-        .stat-breakdown {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        /* Tables */
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-            margin-bottom: 2rem;
-            display: flex;
-            flex-direction: column;
-        }
-        .card-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
+        .stat-breakdown { display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 2rem; display: flex; flex-direction: column; }
+        .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
         .card-title { font-weight: 600; color: var(--text-main); font-size: 1.1rem; }
-
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border); }
         th { background: #f8fafc; color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
         tr:last-child td { border-bottom: none; }
         tr:hover { background: #f8fafc; }
-       
-        .category-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: capitalize;
-            background: var(--bg-body);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
-
-        /* Charts */
-        .charts-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
-        }
-        .chart-wrapper {
-            position: relative;
-            height: 400px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-        }
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            backdrop-filter: blur(4px);
-        }
-        .modal {
-            background: var(--bg-card);
-            padding: 2rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-            border: 1px solid var(--border);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        /* Toast */
-        #toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 200;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .toast {
-            background: white;
-            color: var(--text-main);
-            padding: 1rem 1.25rem;
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow-lg);
-            font-size: 0.9rem;
-            animation: slideInRight 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            min-width: 300px;
-            border-left: 4px solid var(--primary);
-        }
+        .category-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; background: var(--bg-body); color: var(--text-secondary); border: 1px solid var(--border); }
+        .charts-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+        .chart-wrapper { position: relative; height: 400px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 1rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal { background: var(--bg-card); padding: 2rem; border-radius: 16px; width: 100%; max-width: 500px; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+        #toast-container { position: fixed; top: 24px; right: 24px; z-index: 200; display: flex; flex-direction: column; gap: 12px; }
+        .toast { background: white; color: var(--text-main); padding: 1rem 1.25rem; border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); font-size: 0.9rem; animation: slideInRight 0.3s ease; display: flex; align-items: center; gap: 0.75rem; min-width: 300px; border-left: 4px solid var(--primary); }
         .toast.success { border-left-color: var(--success); }
         .toast.error { border-left-color: var(--danger); }
-
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(50px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
         @media (max-width: 1024px) { .charts-container { grid-template-columns: 1fr; } }
-        @media (max-width: 768px) {
-            #app-view { flex-direction: column; }
-            aside { width: 100%; height: auto; padding: 1rem; flex-direction: row; justify-content: space-between; border-right: none; border-bottom: 1px solid var(--border); }
-            .nav-menu { display: none; }
-            .sidebar-logo { padding: 0; margin-bottom: 0; }
-            .user-profile { border-top: none; padding-top: 0; margin-top: 0; }
-            .nav-label { display: none; }
-            
-            /* Mobile Auth Adjustments */
-            .auth-card { margin: 1rem; padding: 1.5rem; }
-            .bg-shape { display: none; } /* Hide shapes on mobile for performance/clarity */
-        }
+        @media (max-width: 768px) { #app-view { flex-direction: column; } aside { width: 100%; height: auto; padding: 1rem; flex-direction: row; justify-content: space-between; border-right: none; border-bottom: 1px solid var(--border); } .nav-menu { display: none; } .sidebar-logo { padding: 0; margin-bottom: 0; } .user-profile { border-top: none; padding-top: 0; margin-top: 0; } .nav-label { display: none; } .auth-card { margin: 1rem; padding: 1.5rem; } .bg-shape { display: none; } }
+        /* Loading spinner */
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Toast Notifications -->
     <div id="toast-container"></div>
 
     <!-- Auth View -->
     <section id="auth-view">
-        <!-- Decorative Background Shapes -->
         <div class="bg-shape shape-1"></div>
         <div class="bg-shape shape-2"></div>
         <div class="bg-shape shape-3"></div>
@@ -515,13 +139,10 @@
 
         <div class="auth-card">
             <div class="auth-header">
-                <div class="auth-logo">
-                    <span style="font-weight: 700;">₹</span>
-                </div>
+                <div class="auth-logo"><span style="font-weight: 700;">₹</span></div>
                 <h2 class="auth-title">Welcome Back</h2>
                 <p class="auth-subtitle">Login to manage your financial life.</p>
             </div>
-           
             <div class="auth-tabs">
                 <div class="auth-tab active" onclick="switchAuth('login')" id="tab-login">Login</div>
                 <div class="auth-tab" onclick="switchAuth('register')" id="tab-register">Register</div>
@@ -533,7 +154,7 @@
                 <input type="text" id="login-user" required placeholder="e.g. john_doe">
                 <label>Password</label>
                 <input type="password" id="login-pass" required placeholder="•••••••">
-                <button type="submit" class="btn btn-primary w-full mt-4">Sign In</button>
+                <button type="submit" class="btn btn-primary w-full" style="margin-top:1rem;" id="login-btn">Sign In</button>
             </form>
 
             <!-- Register Form -->
@@ -548,17 +169,14 @@
                         <input type="password" id="reg-pass" required placeholder="•••••••">
                     </div>
                 </div>
-               
                 <label>Salary Amount (₹)</label>
                 <input type="number" id="reg-salary" required placeholder="50000" min="0">
-               
                 <label>Salary Type</label>
                 <select id="reg-salary-type" required>
                     <option value="monthly">Monthly</option>
                     <option value="annual">Annual (Yearly)</option>
                 </select>
-
-                <button type="submit" class="btn btn-primary w-full mt-4">Create Account</button>
+                <button type="submit" class="btn btn-primary w-full" style="margin-top:1rem;" id="register-btn">Create Account</button>
             </form>
         </div>
     </section>
@@ -567,26 +185,16 @@
     <section id="app-view" class="hidden">
         <aside>
             <div class="sidebar-logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 3h12M6 8h12M6 13h4.5c2.5 0 4.5 2 4.5 4.5S13 22 10.5 22H6"/>
-                </svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13h4.5c2.5 0 4.5 2 4.5 4.5S13 22 10.5 22H6"/></svg>
                 Track Expense
             </div>
             <nav class="nav-menu">
                 <div class="nav-label">Overview</div>
-                <div class="nav-item active" onclick="navigate('dashboard')" id="nav-dashboard">
-                    <span class="nav-icon">📊</span> Dashboard
-                </div>
-                <div class="nav-item" onclick="navigate('expenses')" id="nav-expenses">
-                    <span class="nav-icon">📝</span> Expenses
-                </div>
+                <div class="nav-item active" onclick="navigate('dashboard')" id="nav-dashboard"><span class="nav-icon">📊</span> Dashboard</div>
+                <div class="nav-item" onclick="navigate('expenses')" id="nav-expenses"><span class="nav-icon">📝</span> Expenses</div>
                 <div class="nav-label">Analysis</div>
-                <div class="nav-item" onclick="navigate('reports')" id="nav-reports">
-                    <span class="nav-icon">📈</span> Analytics
-                </div>
-                <div class="nav-item" onclick="navigate('settings')" id="nav-settings">
-                    <span class="nav-icon">⚙️</span> Settings
-                </div>
+                <div class="nav-item" onclick="navigate('reports')" id="nav-reports"><span class="nav-icon">📈</span> Analytics</div>
+                <div class="nav-item" onclick="navigate('settings')" id="nav-settings"><span class="nav-icon">⚙️</span> Settings</div>
             </nav>
             <div class="user-profile">
                 <div class="user-avatar" id="user-avatar">S</div>
@@ -601,177 +209,75 @@
         </aside>
 
         <main>
-            <!-- Dashboard Section -->
+            <!-- Dashboard -->
             <div id="page-dashboard">
                 <header>
-                    <div>
-                        <h2>Dashboard</h2>
-                        <p class="text-sm text-secondary">Financial overview for this year.</p>
-                    </div>
+                    <div><h2>Dashboard</h2><p class="text-sm text-secondary">Financial overview for this year.</p></div>
                     <button class="btn btn-primary" onclick="openModal()">+ Add Expense</button>
                 </header>
-
                 <div class="stats-grid">
-                    <!-- Annual Income Card -->
                     <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-label">Annual Income</div>
-                            <div class="stat-icon">💵</div>
-                        </div>
+                        <div class="stat-header"><div class="stat-label">Annual Income</div><div class="stat-icon">💵</div></div>
                         <div class="stat-value" id="dash-income">₹0.00</div>
-                        <div class="stat-breakdown" id="income-breakdown">
-                            <span>Monthly: ₹0</span>
-                            <span>Bonus: ₹0</span>
-                        </div>
+                        <div class="stat-breakdown" id="income-breakdown"><span>Monthly: ₹0</span><span>Bonus: ₹0</span></div>
                     </div>
-                   
-                    <!-- Annual Expenses Card -->
                     <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-label">Annual Expenses (This Year)</div>
-                            <div class="stat-icon" style="background: #fee2e2; color: #ef4444;">📉</div>
-                        </div>
+                        <div class="stat-header"><div class="stat-label">Annual Expenses (This Year)</div><div class="stat-icon" style="background:#fee2e2;color:#ef4444;">📉</div></div>
                         <div class="stat-value" id="dash-spent">₹0.00</div>
                     </div>
-
-                    <!-- Net Savings Card -->
                     <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-label">Net Savings (This Year)</div>
-                            <div class="stat-icon" style="background: #dcfce7; color: #10b981;">💎</div>
-                        </div>
+                        <div class="stat-header"><div class="stat-label">Net Savings (This Year)</div><div class="stat-icon" style="background:#dcfce7;color:#10b981;">💎</div></div>
                         <div class="stat-value" id="dash-savings">₹0.00</div>
                     </div>
                 </div>
-
                 <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Recent Transactions</div>
-                        <button class="btn btn-ghost btn-sm" onclick="navigate('expenses')">View All</button>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table id="recent-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Category</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                    <div class="card-header"><div class="card-title">Recent Transactions</div><button class="btn btn-ghost btn-sm" onclick="navigate('expenses')">View All</button></div>
+                    <div style="overflow-x:auto;"><table id="recent-table"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead><tbody></tbody></table></div>
                 </div>
             </div>
 
-            <!-- Expenses Section -->
+            <!-- Expenses -->
             <div id="page-expenses" class="hidden">
                 <header>
-                    <div>
-                        <h2>Expenses</h2>
-                        <p class="text-sm text-secondary">Manage and track your daily spending.</p>
-                    </div>
+                    <div><h2>Expenses</h2><p class="text-sm text-secondary">Manage and track your daily spending.</p></div>
                     <button class="btn btn-primary" onclick="openModal()">+ Add New</button>
                 </header>
-               
                 <div class="card">
-                    <div class="card-header" style="justify-content: flex-start; align-items: center;">
-                        <div class="flex gap-2 w-full items-center">
-                            <input type="text" id="search-expense" placeholder="Search transactions..." style="margin-bottom: 0; max-width: 300px;" onkeyup="renderExpenseTable()">
-                        </div>
+                    <div class="card-header" style="justify-content:flex-start;">
+                        <input type="text" id="search-expense" placeholder="Search transactions..." style="margin-bottom:0;max-width:300px;" onkeyup="renderExpenseTable()">
                     </div>
-                    <table id="full-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <table id="full-table"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead><tbody></tbody></table>
                 </div>
             </div>
 
-            <!-- Reports Section -->
+            <!-- Analytics -->
             <div id="page-reports" class="hidden">
                 <header>
-                    <div>
-                        <h2>Analytics</h2>
-                        <p class="text-sm text-secondary">Breakdown of your financial habits.</p>
-                    </div>
+                    <div><h2>Analytics</h2><p class="text-sm text-secondary">Breakdown of your financial habits.</p></div>
                     <button class="btn btn-outline" onclick="generateReport()">Download Report</button>
                 </header>
                 <div class="charts-container">
-                    <div class="card">
-                        <div class="card-header"><div class="card-title">Category Distribution</div></div>
-                        <div class="chart-wrapper">
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header"><div class="card-title">Annual Spending Trend</div></div>
-                        <div class="chart-wrapper">
-                            <canvas id="barChart"></canvas>
-                        </div>
-                    </div>
+                    <div class="card"><div class="card-header"><div class="card-title">Category Distribution</div></div><div class="chart-wrapper"><canvas id="pieChart"></canvas></div></div>
+                    <div class="card"><div class="card-header"><div class="card-title">Annual Spending Trend</div></div><div class="chart-wrapper"><canvas id="barChart"></canvas></div></div>
                 </div>
             </div>
 
-            <!-- Settings Section -->
+            <!-- Settings -->
             <div id="page-settings" class="hidden">
-                <header>
-                    <div>
-                        <h2>Settings</h2>
-                        <p class="text-sm text-secondary">Manage your income and bonuses.</p>
-                    </div>
-                </header>
-
-                <!-- Salary Card -->
-                <div class="card" style="max-width: 800px; margin-bottom: 2rem;">
-                    <div class="card-header">
-                        <div class="card-title">Salary Configuration</div>
-                    </div>
-                    <div style="padding: 2rem;">
+                <header><div><h2>Settings</h2><p class="text-sm text-secondary">Manage your income and bonuses.</p></div></header>
+                <div class="card" style="max-width:800px;margin-bottom:2rem;">
+                    <div class="card-header"><div class="card-title">Salary Configuration</div></div>
+                    <div style="padding:2rem;">
                         <div class="flex gap-4">
-                            <div class="w-full">
-                                <label>Salary Amount (₹)</label>
-                                <input type="number" id="settings-salary" placeholder="50000">
-                            </div>
-                            <div class="w-full">
-                                <label>Type</label>
-                                <select id="settings-salary-type">
-                                    <option value="monthly">Monthly</option>
-                                    <option value="annual">Annual (Yearly)</option>
-                                </select>
-                            </div>
+                            <div class="w-full"><label>Salary Amount (₹)</label><input type="number" id="settings-salary" placeholder="50000"></div>
+                            <div class="w-full"><label>Type</label><select id="settings-salary-type"><option value="monthly">Monthly</option><option value="annual">Annual (Yearly)</option></select></div>
                         </div>
                         <button class="btn btn-primary" onclick="updateSalarySettings()">Update Salary</button>
                     </div>
                 </div>
-
-                <!-- Bonuses Card -->
-                <div class="card" style="max-width: 800px;">
-                    <div class="card-header">
-                        <div class="card-title">One-time Bonuses</div>
-                        <button class="btn btn-sm btn-outline" onclick="openBonusModal()">+ Add Bonus</button>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table id="bonus-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                <div class="card" style="max-width:800px;">
+                    <div class="card-header"><div class="card-title">One-time Bonuses</div><button class="btn btn-sm btn-outline" onclick="openBonusModal()">+ Add Bonus</button></div>
+                    <div style="overflow-x:auto;"><table id="bonus-table"><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
                 </div>
             </div>
         </main>
@@ -781,7 +287,7 @@
     <div id="expense-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold" style="font-size: 1.2rem;" id="modal-title">Add Expense</h3>
+                <h3 class="font-bold" style="font-size:1.2rem;" id="modal-title">Add Expense</h3>
                 <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
             </div>
             <form id="expense-form" onsubmit="handleExpenseSubmit(event)">
@@ -789,29 +295,16 @@
                 <label>Description</label>
                 <input type="text" id="exp-desc" required placeholder="e.g. Lunch at cafeteria">
                 <div class="flex gap-4">
-                    <div class="w-full">
-                        <label>Amount (₹)</label>
-                        <input type="number" id="exp-amount" required min="0.01" step="0.01">
-                    </div>
-                    <div class="w-full">
-                        <label>Date (DD/MM/YYYY)</label>
-                        <input type="text" id="exp-date" required placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}">
-                    </div>
+                    <div class="w-full"><label>Amount (₹)</label><input type="number" id="exp-amount" required min="0.01" step="0.01"></div>
+                    <div class="w-full"><label>Date (DD/MM/YYYY)</label><input type="text" id="exp-date" required placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}"></div>
                 </div>
-               
                 <label>Category</label>
                 <input type="text" list="category-list" id="exp-category" required placeholder="Select or type new category">
                 <datalist id="category-list">
-                    <option value="Food">
-                    <option value="Transport">
-                    <option value="Education">
-                    <option value="Entertainment">
-                    <option value="Utilities">
-                    <option value="Shopping">
-                    <option value="Health">
-                    <option value="Other">
+                    <option value="Food"><option value="Transport"><option value="Education">
+                    <option value="Entertainment"><option value="Utilities"><option value="Shopping">
+                    <option value="Health"><option value="Other">
                 </datalist>
-
                 <div class="modal-actions">
                     <button type="button" class="btn btn-ghost" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Expense</button>
@@ -824,21 +317,15 @@
     <div id="bonus-modal" class="modal-overlay hidden">
         <div class="modal">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold" style="font-size: 1.2rem;">Add Bonus</h3>
+                <h3 class="font-bold" style="font-size:1.2rem;">Add Bonus</h3>
                 <button class="btn btn-ghost btn-sm" onclick="closeBonusModal()">✕</button>
             </div>
             <form id="bonus-form" onsubmit="handleBonusSubmit(event)">
                 <label>Description</label>
                 <input type="text" id="bonus-desc" required placeholder="e.g. Holiday Bonus">
                 <div class="flex gap-4">
-                    <div class="w-full">
-                        <label>Amount (₹)</label>
-                        <input type="number" id="bonus-amount" required min="0.01" step="0.01">
-                    </div>
-                    <div class="w-full">
-                        <label>Date Received</label>
-                        <input type="text" id="bonus-date" required placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}">
-                    </div>
+                    <div class="w-full"><label>Amount (₹)</label><input type="number" id="bonus-amount" required min="0.01" step="0.01"></div>
+                    <div class="w-full"><label>Date Received</label><input type="text" id="bonus-date" required placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}"></div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-ghost" onclick="closeBonusModal()">Cancel</button>
@@ -848,432 +335,198 @@
         </div>
     </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        // Register the DataLabels plugin globally
-        Chart.register(ChartDataLabels);
+    <!-- ✅ FIREBASE SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import {
+            getFirestore,
+            doc, setDoc, getDoc, updateDoc,
+            collection, addDoc, getDocs, deleteDoc, query, orderBy
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-        // Global variables to hold Chart.js instances
+        // ✅ YOUR FIREBASE CONFIG — already filled in!
+        const firebaseConfig = {
+            apiKey: "AIzaSyAQvkYBfCqPw1zJB1G0JGEqwLCZXeDhkSA",
+            authDomain: "expense-tracker-a2d96.firebaseapp.com",
+            projectId: "expense-tracker-a2d96",
+            storageBucket: "expense-tracker-a2d96.firebasestorage.app",
+            messagingSenderId: "520215457243",
+            appId: "1:520215457243:web:c853f2247b1f97f9754bfe"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // ── Expose to global scope so other functions can use them ──
+        window._auth = auth;
+        window._db = db;
+        window._fb = {
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            doc, setDoc, getDoc, updateDoc,
+            collection, addDoc, getDocs, deleteDoc, query, orderBy
+        };
+
+        // ── Listen for login/logout automatically ──
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await loadUserData(user.uid);
+                initApp();
+            } else {
+                document.getElementById('auth-view').classList.remove('hidden');
+                document.getElementById('app-view').classList.add('hidden');
+            }
+        });
+
+        // ── Load user profile + expenses + bonuses from Firestore ──
+        async function loadUserData(uid) {
+            const { doc, getDoc, collection, getDocs } = window._fb;
+
+            // Load profile
+            const profileSnap = await getDoc(doc(db, "users", uid, "profile", "info"));
+            if (profileSnap.exists()) {
+                window._profile = profileSnap.data();
+            } else {
+                window._profile = { username: "User", salary: 0, salaryType: "monthly" };
+            }
+            window._uid = uid;
+
+            // Load expenses
+            const expSnap = await getDocs(collection(db, "users", uid, "expenses"));
+            window._expenses = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Load bonuses
+            const bonSnap = await getDocs(collection(db, "users", uid, "bonuses"));
+            window._bonuses = bonSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+        window._loadUserData = loadUserData;
+    </script>
+
+    <!-- ✅ MAIN APP LOGIC -->
+    <script>
+        Chart.register(ChartDataLabels);
         let pieChartInstance = null;
         let barChartInstance = null;
 
-        const DB_KEY = 'smart_expense_tracker_db_v3';
-        let state = { users: [], currentUser: null };
-
         window.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            checkSession();
-            // Set default date for expense input to today in DD/MM/YYYY
             document.getElementById('exp-date').value = getTodayDateDMY();
             document.getElementById('bonus-date').value = getTodayDateDMY();
         });
 
-        // Helper to get today's date in DD/MM/YYYY
         function getTodayDateDMY() {
             const today = new Date();
-            const day = String(today.getDate()).padStart(2, '0');
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const year = today.getFullYear();
-            return `${day}/${month}/${year}`;
+            return String(today.getDate()).padStart(2,'0') + '/' +
+                   String(today.getMonth()+1).padStart(2,'0') + '/' +
+                   today.getFullYear();
         }
 
-        function ensureStateStructure() {
-            if (!state.users) state.users = [];
-            if (!Array.isArray(state.users)) state.users = [];
-            if (state.currentUser) {
-                const userExists = state.users.find(u => u.username === state.currentUser.username);
-                if (!userExists) {
-                    state.users.push(state.currentUser);
-                } else {
-                    state.currentUser = userExists;
-                }
-            }
-            if (state.currentUser) {
-                if(!state.currentUser.salary) state.currentUser.salary = 0;
-                if(!state.currentUser.salaryType) state.currentUser.salaryType = 'monthly';
-                if(!state.currentUser.bonuses) state.currentUser.bonuses = [];
-                if(!state.currentUser.expenses) state.currentUser.expenses = [];
-            }
-        }
-
-        function loadData() {
-            try {
-                const stored = localStorage.getItem(DB_KEY);
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    state = { ...state, ...parsed };
-                }
-                ensureStateStructure();
-            } catch (e) {
-                console.error("Data load error", e);
-                localStorage.removeItem(DB_KEY);
-            }
-        }
-
-        function saveData() {
-            ensureStateStructure();
-            localStorage.setItem(DB_KEY, JSON.stringify(state));
-        }
-
-        // --- Auth System ---
         function switchAuth(type) {
-            const loginForm = document.getElementById('login-form');
-            const regForm = document.getElementById('register-form');
-            const tabLogin = document.getElementById('tab-login');
-            const tabReg = document.getElementById('tab-register');
-           
-            if (type === 'login') {
-                loginForm.classList.remove('hidden');
-                regForm.classList.add('hidden');
-                tabLogin.classList.add('active');
-                tabReg.classList.remove('active');
-            } else {
-                loginForm.classList.add('hidden');
-                regForm.classList.remove('hidden');
-                tabLogin.classList.remove('active');
-                tabReg.classList.add('active');
-            }
+            document.getElementById('login-form').classList.toggle('hidden', type !== 'login');
+            document.getElementById('register-form').classList.toggle('hidden', type !== 'register');
+            document.getElementById('tab-login').classList.toggle('active', type === 'login');
+            document.getElementById('tab-register').classList.toggle('active', type === 'register');
         }
 
-        function handleRegister(e) {
+        // ── REGISTER ──
+        async function handleRegister(e) {
             e.preventDefault();
-            const user = document.getElementById('reg-user').value.trim();
-            const pass = document.getElementById('reg-pass').value.trim();
+            const username = document.getElementById('reg-user').value.trim();
+            const password = document.getElementById('reg-pass').value.trim();
             const salary = parseFloat(document.getElementById('reg-salary').value);
             const salaryType = document.getElementById('reg-salary-type').value;
+            const btn = document.getElementById('register-btn');
 
-            if (state.users.find(u => u.username === user)) {
-                showToast('Username already exists', 'error');
-                return;
-            }
+            btn.innerHTML = '<span class="spinner"></span> Creating...';
+            btn.disabled = true;
 
-            const newUser = {
-                username: user,
-                password: pass,
-                salary: salary || 0,
-                salaryType: salaryType || 'monthly',
-                expenses: [],
-                bonuses: []
-            };
+            try {
+                const { createUserWithEmailAndPassword, doc, setDoc } = window._fb;
+                // Firebase needs an email — we create a fake one from the username
+                const fakeEmail = username.toLowerCase().replace(/\s/g,'_') + '@expensetracker.app';
+                const userCred = await createUserWithEmailAndPassword(window._auth, fakeEmail, password);
+                const uid = userCred.user.uid;
 
-            state.users.push(newUser);
-            state.currentUser = newUser;
-            saveData();
-            showToast('Account created successfully!', 'success');
-            initApp();
-        }
-        async function handleLogin(e){
-        e.preventDefault()
+                // Save profile to Firestore
+                await setDoc(doc(window._db, "users", uid, "profile", "info"), {
+                    username, salary: salary || 0, salaryType
+                });
 
-        const user = document.getElementById("login-user").value
-        const pass = document.getElementById("login-pass").value
+                window._profile = { username, salary: salary || 0, salaryType };
+                window._uid = uid;
+                window._expenses = [];
+                window._bonuses = [];
 
-        const res = await fetch("https://yourusername.pythonanywhere.com/login",{
-        method:"POST",
-        headers:{
-        "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-        username:user,
-        password:pass
-    })
-})
-
-    const data = await res.json()
-
-    if(data.status=="success"){
-    alert("Login success")
-    }
-    else{
-    alert("Invalid login")
-    }
-}
-        
-        function logout() {
-            state.currentUser = null;
-            saveData();
-            location.reload();
-        }
-
-        function checkSession() {
-            if (state.currentUser && state.currentUser.username) {
-                const liveUser = state.users.find(u => u.username === state.currentUser.username);
-                if(liveUser) {
-                    state.currentUser = liveUser;
-                    initApp();
-                } else {
-                    state.currentUser = null;
-                }
+                showToast('Account created successfully! 🎉', 'success');
+            } catch (err) {
+                showToast(friendlyError(err.code), 'error');
+                btn.innerHTML = 'Create Account';
+                btn.disabled = false;
             }
         }
 
-        // --- App Logic ---
+        // ── LOGIN ──
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-user').value.trim();
+            const password = document.getElementById('login-pass').value.trim();
+            const btn = document.getElementById('login-btn');
+
+            btn.innerHTML = '<span class="spinner"></span> Signing in...';
+            btn.disabled = true;
+
+            try {
+                const { signInWithEmailAndPassword } = window._fb;
+                const fakeEmail = username.toLowerCase().replace(/\s/g,'_') + '@expensetracker.app';
+                await signInWithEmailAndPassword(window._auth, fakeEmail, password);
+                // onAuthStateChanged will handle the rest
+            } catch (err) {
+                showToast(friendlyError(err.code), 'error');
+                btn.innerHTML = 'Sign In';
+                btn.disabled = false;
+            }
+        }
+
+        // ── LOGOUT ──
+        async function logout() {
+            await window._fb.signOut(window._auth);
+        }
+
+        // ── INIT APP after login ──
         function initApp() {
             document.getElementById('auth-view').classList.add('hidden');
             document.getElementById('app-view').classList.remove('hidden');
-            document.getElementById('display-username').textContent = state.currentUser.username;
-            document.getElementById('user-avatar').textContent = state.currentUser.username.charAt(0).toUpperCase();
+            document.getElementById('display-username').textContent = window._profile.username;
+            document.getElementById('user-avatar').textContent = window._profile.username.charAt(0).toUpperCase();
             navigate('dashboard');
         }
 
         function navigate(pageId) {
-            ['dashboard', 'expenses', 'reports', 'settings'].forEach(p => {
+            ['dashboard','expenses','reports','settings'].forEach(p => {
                 document.getElementById(`page-${p}`).classList.add('hidden');
                 const nav = document.getElementById(`nav-${p}`);
                 if(nav) nav.classList.remove('active');
             });
-            const targetPage = document.getElementById(`page-${pageId}`);
-            const targetNav = document.getElementById(`nav-${pageId}`);
-            targetPage.classList.remove('hidden');
-            if(targetNav) targetNav.classList.add('active');
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            const nav = document.getElementById(`nav-${pageId}`);
+            if(nav) nav.classList.add('active');
 
             if (pageId === 'dashboard') updateDashboard();
             if (pageId === 'expenses') renderExpenseTable();
-            if (pageId === 'reports') {
-                requestAnimationFrame(() => {
-                    renderCharts();
-                });
-            }
+            if (pageId === 'reports') requestAnimationFrame(() => renderCharts());
             if (pageId === 'settings') renderSettings();
         }
 
-        // --- Income & Dashboard Logic
-       
-        function parseDateDMY(dateStr) {
-            if (!dateStr) return new Date('invalid'); 
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return new Date(dateStr); // Fallback
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10) - 1; 
-            const year = parseInt(parts[2], 10);
-            return new Date(year, month, day);
-        }
-
-        function updateDashboard() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-
-            let annualSalary = state.currentUser.salary || 0;
-            if (state.currentUser.salaryType === 'monthly') {
-                annualSalary = annualSalary * 12;
-            }
-           
-            const monthlySalaryAvg = annualSalary / 12;
-
-            const totalBonusesYear = (state.currentUser.bonuses || [])
-                .filter(b => {
-                    const d = parseDateDMY(b.date);
-                    return d.getFullYear() === currentYear;
-                })
-                .reduce((sum, b) => sum + parseFloat(b.amount), 0);
-
-            const expenses = state.currentUser.expenses || [];
-            const annualExpenses = expenses
-                .filter(e => {
-                    const d = parseDateDMY(e.date);
-                    return d.getFullYear() === currentYear;
-                })
-                .reduce((sum, e) => sum + parseFloat(e.amount), 0);
-
-            const netSavings = annualSalary + totalBonusesYear - annualExpenses;
-
-            document.getElementById('dash-income').textContent = formatCurrency(annualSalary);
-            
-            document.getElementById('income-breakdown').innerHTML =
-                `<span>Monthly Avg: <b>${formatCurrency(monthlySalaryAvg)}</b></span> | <span>Bonus (Year): <b>${formatCurrency(totalBonusesYear)}</b></span>`;
-
-            document.getElementById('dash-spent').textContent = formatCurrency(annualExpenses);
-
-            const savingsEl = document.getElementById('dash-savings');
-            savingsEl.textContent = formatCurrency(netSavings);
-
-            if (netSavings < 0) {
-                savingsEl.style.color = 'var(--danger)';
-            } else {
-                savingsEl.style.color = 'var(--text-main)';
-            }
-
-            const recent = [...expenses].sort((a, b) => parseDateDMY(b.date) - parseDateDMY(a.date)).slice(0, 5);
-            const tbody = document.querySelector('#recent-table tbody');
-            tbody.innerHTML = '';
-           
-            if (recent.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color:var(--text-secondary);">No recent transactions.</td></tr>';
-            } else {
-                recent.forEach(ex => {
-                    tbody.innerHTML += 
-                        `<tr>
-                            <td>${ex.date}</td>
-                            <td><span class="category-badge" style="background:${getCatBg(ex.category)}; color:${getCatColor(ex.category)}">${ex.category}</span></td>
-                            <td>${ex.desc}</td>
-                            <td class="font-bold">${formatCurrency(ex.amount)}</td>
-                        </tr>`;
-                });
-            }
-        }
-
-        // --- Settings & Bonus Logic ---
-        function renderSettings() {
-            const user = state.currentUser;
-            document.getElementById('settings-salary').value = user.salary;
-            document.getElementById('settings-salary-type').value = user.salaryType;
-
-            const tbody = document.querySelector('#bonus-table tbody');
-            tbody.innerHTML = '';
-            const bonuses = user.bonuses || [];
-            bonuses.sort((a, b) => parseDateDMY(b.date) - parseDateDMY(a.date));
-
-            if (bonuses.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">No bonuses added yet.</td></tr>';
-            } else {
-                bonuses.forEach(b => {
-                    tbody.innerHTML += 
-                        `<tr>
-                            <td>${b.date}</td>
-                            <td>${b.desc}</td>
-                            <td class="font-bold text-success">+${formatCurrency(b.amount)}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger" onclick="deleteBonus('${b.id}')">Delete</button>
-                            </td>
-                        </tr>`;
-                });
-            }
-        }
-
-        function updateSalarySettings() {
-            const salary = parseFloat(document.getElementById('settings-salary').value);
-            const type = document.getElementById('settings-salary-type').value;
-            if (salary >= 0) {
-                state.currentUser.salary = salary;
-                state.currentUser.salaryType = type;
-                saveData();
-                showToast('Salary configuration updated', 'success');
-               
-                if(!document.getElementById('page-dashboard').classList.contains('hidden')) {
-                    updateDashboard();
-                }
-            } else {
-                showToast('Invalid salary amount', 'error');
-            }
-        }
-
-        function openBonusModal() {
-            document.getElementById('bonus-modal').classList.remove('hidden');
-            document.getElementById('bonus-form').reset();
-            document.getElementById('bonus-date').value = getTodayDateDMY();
-        }
-
-        function closeBonusModal() {
-            document.getElementById('bonus-modal').classList.add('hidden');
-        }
-
-        function handleBonusSubmit(e) {
-            e.preventDefault();
-            const desc = document.getElementById('bonus-desc').value;
-            const amount = parseFloat(document.getElementById('bonus-amount').value);
-            const date = document.getElementById('bonus-date').value;
-
-            if(!isValidDate(date)){
-                showToast('Invalid date format. Use DD/MM/YYYY', 'error');
-                return;
-            }
-
-            const newBonus = { id: Date.now().toString(), desc, amount, date };
-            state.currentUser.bonuses.push(newBonus);
-            saveData();
-            showToast('Bonus added successfully', 'success');
-            closeBonusModal();
-            renderSettings();
-            if(!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
-        }
-
-        function deleteBonus(id) {
-            if(confirm("Are you sure you want to delete this bonus?")) {
-                state.currentUser.bonuses = state.currentUser.bonuses.filter(b => b.id !== id);
-                saveData();
-                renderSettings();
-                if(!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
-                showToast('Bonus deleted', 'success');
-            }
-        }
-
-        // --- Expense CRUD ---
-        function renderExpenseTable() {
-            const search = document.getElementById('search-expense').value.toLowerCase();
-            let expenses = state.currentUser.expenses || [];
-            expenses.sort((a, b) => parseDateDMY(b.date) - parseDateDMY(a.date));
-
-            const tbody = document.querySelector('#full-table tbody');
-            tbody.innerHTML = '';
-
-            const filtered = expenses.filter(e => {
-                const textMatch = (e.desc && e.desc.toLowerCase().includes(search)) || (e.category && e.category.toLowerCase().includes(search));
-                return textMatch;
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2rem;">No expenses found matching your filters.</td></tr>';
-                return;
-            }
-
-            filtered.forEach(ex => {
-                tbody.innerHTML += 
-                    `<tr>
-                        <td>${ex.date}</td>
-                        <td><span class="category-badge" style="background:${getCatBg(ex.category)}; color:${getCatColor(ex.category)}">${ex.category}</span></td>
-                        <td>${ex.desc}</td>
-                        <td class="font-bold">${formatCurrency(ex.amount)}</td>
-                        <td>
-                            <div class="flex gap-2">
-                                <button class="btn btn-outline btn-sm" onclick="editExpense('${ex.id}')">Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteExpense('${ex.id}')">Delete</button>
-                            </div>
-                        </td>
-                    </tr>`;
-            });
-        }
-
-        function closeModal() {
-            document.getElementById('expense-modal').classList.add('hidden');
-        }
-
-        function openModal(editId = null) {
-            const modal = document.getElementById('expense-modal');
-            const title = document.getElementById('modal-title');
-            modal.classList.remove('hidden');
-           
-            if (editId) {
-                const ex = state.currentUser.expenses.find(e => e.id === editId);
-                if (ex) {
-                    document.getElementById('edit-id').value = ex.id;
-                    document.getElementById('exp-desc').value = ex.desc;
-                    document.getElementById('exp-amount').value = ex.amount;
-                    document.getElementById('exp-date').value = ex.date; 
-                    document.getElementById('exp-category').value = ex.category;
-                    title.textContent = "Edit Expense";
-                }
-            } else {
-                document.getElementById('edit-id').value = '';
-                document.getElementById('exp-desc').value = '';
-                document.getElementById('exp-amount').value = '';
-                document.getElementById('exp-date').value = getTodayDateDMY();
-                document.getElementById('exp-category').value = '';
-                title.textContent = "Add Expense";
-            }
-        }
-
-        function isValidDate(dateStr) {
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return false;
-            const d = parseInt(parts[0], 10);
-            const m = parseInt(parts[1], 10);
-            const y = parseInt(parts[2], 10);
-            if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900) return false;
-            const dateObj = new Date(y, m - 1, d);
-            return dateObj.getFullYear() === y && dateObj.getMonth() === m - 1 && dateObj.getDate() === d;
-        }
-
-        function handleExpenseSubmit(e) {
+        // ── ADD EXPENSE ──
+        async function handleExpenseSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
             const desc = document.getElementById('exp-desc').value;
@@ -1281,189 +534,250 @@
             const date = document.getElementById('exp-date').value;
             const category = document.getElementById('exp-category').value;
 
-            if(!isValidDate(date)){
-                showToast('Invalid date format. Use DD/MM/YYYY', 'error');
-                return;
-            }
+            if(!isValidDate(date)) { showToast('Invalid date. Use DD/MM/YYYY', 'error'); return; }
+
+            const { collection, addDoc, doc, updateDoc } = window._fb;
 
             if (id) {
-                const idx = state.currentUser.expenses.findIndex(e => e.id === id);
-                if (idx !== -1) {
-                    state.currentUser.expenses[idx] = { ...state.currentUser.expenses[idx], desc, amount, date, category };
-                }
+                // Edit existing
+                await updateDoc(doc(window._db, "users", window._uid, "expenses", id), { desc, amount, date, category });
+                const idx = window._expenses.findIndex(e => e.id === id);
+                if(idx !== -1) window._expenses[idx] = { id, desc, amount, date, category };
             } else {
-                const newExpense = { id: Date.now().toString(), desc, amount, date, category };
-                state.currentUser.expenses.push(newExpense);
+                // Add new
+                const docRef = await addDoc(collection(window._db, "users", window._uid, "expenses"), { desc, amount, date, category });
+                window._expenses.push({ id: docRef.id, desc, amount, date, category });
             }
 
-            saveData();
-            showToast('Expense saved successfully', 'success');
+            showToast('Expense saved ✅', 'success');
             closeModal();
             if (!document.getElementById('page-dashboard').classList.contains('hidden')) updateDashboard();
-            else if (!document.getElementById('page-expenses').classList.contains('hidden')) renderExpenseTable();
+            else renderExpenseTable();
         }
 
-        function deleteExpense(id) {
-            if(confirm("Are you sure you want to delete this expense?")) {
-                state.currentUser.expenses = state.currentUser.expenses.filter(e => e.id !== id);
-                saveData();
-                renderExpenseTable();
-                showToast('Expense deleted', 'success');
+        // ── DELETE EXPENSE ──
+        async function deleteExpense(id) {
+            if(!confirm("Delete this expense?")) return;
+            const { doc, deleteDoc } = window._fb;
+            await deleteDoc(doc(window._db, "users", window._uid, "expenses", id));
+            window._expenses = window._expenses.filter(e => e.id !== id);
+            renderExpenseTable();
+            showToast('Expense deleted', 'success');
+        }
+
+        // ── ADD BONUS ──
+        async function handleBonusSubmit(e) {
+            e.preventDefault();
+            const desc = document.getElementById('bonus-desc').value;
+            const amount = parseFloat(document.getElementById('bonus-amount').value);
+            const date = document.getElementById('bonus-date').value;
+
+            if(!isValidDate(date)) { showToast('Invalid date. Use DD/MM/YYYY', 'error'); return; }
+
+            const { collection, addDoc } = window._fb;
+            const docRef = await addDoc(collection(window._db, "users", window._uid, "bonuses"), { desc, amount, date });
+            window._bonuses.push({ id: docRef.id, desc, amount, date });
+
+            showToast('Bonus added ✅', 'success');
+            closeBonusModal();
+            renderSettings();
+        }
+
+        // ── DELETE BONUS ──
+        async function deleteBonus(id) {
+            if(!confirm("Delete this bonus?")) return;
+            const { doc, deleteDoc } = window._fb;
+            await deleteDoc(doc(window._db, "users", window._uid, "bonuses", id));
+            window._bonuses = window._bonuses.filter(b => b.id !== id);
+            renderSettings();
+            showToast('Bonus deleted', 'success');
+        }
+
+        // ── UPDATE SALARY ──
+        async function updateSalarySettings() {
+            const salary = parseFloat(document.getElementById('settings-salary').value);
+            const salaryType = document.getElementById('settings-salary-type').value;
+            if(isNaN(salary) || salary < 0) { showToast('Invalid salary amount', 'error'); return; }
+
+            const { doc, updateDoc } = window._fb;
+            await updateDoc(doc(window._db, "users", window._uid, "profile", "info"), { salary, salaryType });
+            window._profile.salary = salary;
+            window._profile.salaryType = salaryType;
+            showToast('Salary updated ✅', 'success');
+            updateDashboard();
+        }
+
+        // ── DASHBOARD ──
+        function updateDashboard() {
+            const year = new Date().getFullYear();
+            let annualSalary = window._profile.salary || 0;
+            if (window._profile.salaryType === 'monthly') annualSalary *= 12;
+
+            const totalBonuses = (window._bonuses || [])
+                .filter(b => parseDateDMY(b.date).getFullYear() === year)
+                .reduce((s,b) => s + parseFloat(b.amount), 0);
+
+            const annualExpenses = (window._expenses || [])
+                .filter(e => parseDateDMY(e.date).getFullYear() === year)
+                .reduce((s,e) => s + parseFloat(e.amount), 0);
+
+            const netSavings = annualSalary + totalBonuses - annualExpenses;
+
+            document.getElementById('dash-income').textContent = formatCurrency(annualSalary);
+            document.getElementById('income-breakdown').innerHTML =
+                `<span>Monthly Avg: <b>${formatCurrency(annualSalary/12)}</b></span> | <span>Bonus (Year): <b>${formatCurrency(totalBonuses)}</b></span>`;
+            document.getElementById('dash-spent').textContent = formatCurrency(annualExpenses);
+            const savEl = document.getElementById('dash-savings');
+            savEl.textContent = formatCurrency(netSavings);
+            savEl.style.color = netSavings < 0 ? 'var(--danger)' : 'var(--text-main)';
+
+            const recent = [...(window._expenses||[])].sort((a,b) => parseDateDMY(b.date)-parseDateDMY(a.date)).slice(0,5);
+            const tbody = document.querySelector('#recent-table tbody');
+            tbody.innerHTML = recent.length === 0
+                ? '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-secondary);">No recent transactions.</td></tr>'
+                : recent.map(ex => `<tr><td>${ex.date}</td><td><span class="category-badge" style="background:${getCatBg(ex.category)};color:${getCatColor(ex.category)}">${ex.category}</span></td><td>${ex.desc}</td><td class="font-bold">${formatCurrency(ex.amount)}</td></tr>`).join('');
+        }
+
+        // ── EXPENSE TABLE ──
+        function renderExpenseTable() {
+            const search = (document.getElementById('search-expense').value || '').toLowerCase();
+            const expenses = [...(window._expenses||[])].sort((a,b) => parseDateDMY(b.date)-parseDateDMY(a.date));
+            const filtered = expenses.filter(e =>
+                (e.desc||'').toLowerCase().includes(search) || (e.category||'').toLowerCase().includes(search)
+            );
+            const tbody = document.querySelector('#full-table tbody');
+            tbody.innerHTML = filtered.length === 0
+                ? '<tr><td colspan="5" style="text-align:center;padding:2rem;">No expenses found.</td></tr>'
+                : filtered.map(ex => `<tr><td>${ex.date}</td><td><span class="category-badge" style="background:${getCatBg(ex.category)};color:${getCatColor(ex.category)}">${ex.category}</span></td><td>${ex.desc}</td><td class="font-bold">${formatCurrency(ex.amount)}</td><td><div class="flex gap-2"><button class="btn btn-outline btn-sm" onclick="editExpense('${ex.id}')">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteExpense('${ex.id}')">Delete</button></div></td></tr>`).join('');
+        }
+
+        // ── SETTINGS ──
+        function renderSettings() {
+            document.getElementById('settings-salary').value = window._profile.salary || 0;
+            document.getElementById('settings-salary-type').value = window._profile.salaryType || 'monthly';
+            const bonuses = [...(window._bonuses||[])].sort((a,b) => parseDateDMY(b.date)-parseDateDMY(a.date));
+            const tbody = document.querySelector('#bonus-table tbody');
+            tbody.innerHTML = bonuses.length === 0
+                ? '<tr><td colspan="4" style="text-align:center;padding:2rem;">No bonuses added yet.</td></tr>'
+                : bonuses.map(b => `<tr><td>${b.date}</td><td>${b.desc}</td><td class="font-bold text-success">+${formatCurrency(b.amount)}</td><td><button class="btn btn-sm btn-danger" onclick="deleteBonus('${b.id}')">Delete</button></td></tr>`).join('');
+        }
+
+        // ── CHARTS ──
+        function renderCharts() {
+            const expenses = window._expenses || [];
+            const categoryData = {};
+            expenses.forEach(e => { categoryData[e.category] = (categoryData[e.category]||0) + parseFloat(e.amount); });
+            const pieLabels = Object.keys(categoryData);
+            const pieValues = Object.values(categoryData);
+
+            if (pieChartInstance) pieChartInstance.destroy();
+            pieChartInstance = new Chart(document.getElementById('pieChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: pieLabels, datasets: [{ data: pieValues, backgroundColor: pieLabels.map(getCatColor), borderColor: '#fff', borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.label + ': ' + formatCurrency(c.raw) } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (v, ctx) => { let s = ctx.dataset.data.reduce((a,b)=>a+b,0); return s===0?'0%':(v*100/s).toFixed(1)+'%'; } } } }
+            });
+
+            const year = new Date().getFullYear();
+            const monthlyValues = Array(12).fill(0);
+            expenses.forEach(e => { const d = parseDateDMY(e.date); if(!isNaN(d)&&d.getFullYear()===year) monthlyValues[d.getMonth()]+=parseFloat(e.amount); });
+            const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+            if (barChartInstance) barChartInstance.destroy();
+            barChartInstance = new Chart(document.getElementById('barChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: monthLabels, datasets: [{ label: 'Spending', data: monthlyValues, backgroundColor: '#3b82f6', borderColor: '#2563eb', borderWidth: 1, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { callback: v => '₹'+v } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => 'Spent: '+formatCurrency(c.raw) } }, datalabels: { display: false } } }
+            });
+        }
+
+        // ── MODALS ──
+        function openModal(editId = null) {
+            document.getElementById('expense-modal').classList.remove('hidden');
+            document.getElementById('modal-title').textContent = editId ? 'Edit Expense' : 'Add Expense';
+            if (editId) {
+                const ex = (window._expenses||[]).find(e => e.id === editId);
+                if (ex) {
+                    document.getElementById('edit-id').value = ex.id;
+                    document.getElementById('exp-desc').value = ex.desc;
+                    document.getElementById('exp-amount').value = ex.amount;
+                    document.getElementById('exp-date').value = ex.date;
+                    document.getElementById('exp-category').value = ex.category;
+                }
+            } else {
+                document.getElementById('edit-id').value = '';
+                document.getElementById('exp-desc').value = '';
+                document.getElementById('exp-amount').value = '';
+                document.getElementById('exp-date').value = getTodayDateDMY();
+                document.getElementById('exp-category').value = '';
             }
         }
-
+        function closeModal() { document.getElementById('expense-modal').classList.add('hidden'); }
         function editExpense(id) { openModal(id); }
 
+        function openBonusModal() {
+            document.getElementById('bonus-modal').classList.remove('hidden');
+            document.getElementById('bonus-form').reset();
+            document.getElementById('bonus-date').value = getTodayDateDMY();
+        }
+        function closeBonusModal() { document.getElementById('bonus-modal').classList.add('hidden'); }
+
+        // ── HELPERS ──
+        function parseDateDMY(s) {
+            if(!s) return new Date('invalid');
+            const p = s.split('/');
+            return p.length===3 ? new Date(+p[2], +p[1]-1, +p[0]) : new Date(s);
+        }
+        function isValidDate(s) {
+            const p = s.split('/');
+            if(p.length!==3) return false;
+            const d=+p[0],m=+p[1],y=+p[2];
+            if(d<1||d>31||m<1||m>12||y<1900) return false;
+            const dt=new Date(y,m-1,d);
+            return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d;
+        }
+        function formatCurrency(n) { return '₹'+parseFloat(n).toFixed(2); }
+        function getCatColor(cat) {
+            const p={'Food':'#0ea5e9','Transport':'#f59e0b','Education':'#2563eb','Entertainment':'#8b5cf6','Utilities':'#10b981','Shopping':'#ec4899','Health':'#14b8a6','Other':'#64748b'};
+            if(p[cat]) return p[cat];
+            let h=0; for(let i=0;i<cat.length;i++) h=cat.charCodeAt(i)+((h<<5)-h);
+            const c=(h&0x00FFFFFF).toString(16).toUpperCase();
+            return '#'+"00000".substring(0,6-c.length)+c;
+        }
+        function getCatBg(cat) {
+            const p={'Food':'#e0f2fe','Transport':'#fffbeb','Education':'#dbeafe','Entertainment':'#f5f3ff','Utilities':'#ecfdf5','Shopping':'#fdf2f8','Health':'#f0fdfa','Other':'#f1f5f9'};
+            if(p[cat]) return p[cat];
+            let h=0; for(let i=0;i<cat.length;i++) h=cat.charCodeAt(i)+((h<<5)-h);
+            return `hsl(${Math.abs(h)%360},70%,95%)`;
+        }
+        function friendlyError(code) {
+            const msgs = {
+                'auth/email-already-in-use': 'Username already taken. Try another.',
+                'auth/wrong-password': 'Incorrect password.',
+                'auth/user-not-found': 'No account found with this username.',
+                'auth/weak-password': 'Password must be at least 6 characters.',
+                'auth/too-many-requests': 'Too many attempts. Please wait a moment.'
+            };
+            return msgs[code] || 'Something went wrong. Please try again.';
+        }
+        function showToast(message, type='success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icon = type==='success'
+                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            toast.innerHTML = icon + ' ' + message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.animation='slideInRight 0.3s reverse forwards'; setTimeout(()=>toast.remove(),300); }, 3000);
+        }
         function generateReport() {
-            const expenses = state.currentUser.expenses;
+            const expenses = window._expenses || [];
             let report = "EXPENSE REPORT\n----------------------\n\n";
-            expenses.forEach(e => {
-                report += `${e.date} | ${e.category.padEnd(15)} | ${e.desc.padEnd(20)} | ${formatCurrency(e.amount)}\n`;
-            });
+            expenses.forEach(e => { report += `${e.date} | ${(e.category||'').padEnd(15)} | ${(e.desc||'').padEnd(20)} | ${formatCurrency(e.amount)}\n`; });
             const total = expenses.reduce((s,e)=>s+parseFloat(e.amount),0);
             report += `\nTotal Expenses: ${formatCurrency(total)}`;
             alert(report);
             showToast('Report generated', 'success');
-        }
-
-        // --- CHART.JS IMPLEMENTATION ---
-        function renderCharts() {
-            const expenses = state.currentUser.expenses || [];
-           
-            const categoryData = {};
-            expenses.forEach(e => {
-                const amount = parseFloat(e.amount);
-                categoryData[e.category] = (categoryData[e.category] || 0) + amount;
-            });
-
-            const pieLabels = Object.keys(categoryData);
-            const pieValues = Object.values(categoryData);
-            const pieBackgroundColors = pieLabels.map(cat => getCatColor(cat));
-            const pieBorderColors = pieLabels.map(cat => '#ffffff');
-
-            if (pieChartInstance) pieChartInstance.destroy();
-
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            pieChartInstance = new Chart(pieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: pieLabels,
-                    datasets: [{
-                        data: pieValues,
-                        backgroundColor: pieBackgroundColors,
-                        borderColor: pieBorderColors,
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { padding: 20, font: { family: "'Inter', sans-serif", size: 14 } } },
-                        tooltip: { callbacks: { label: function(context) { let label = context.label || ''; if (label) label += ': '; label += formatCurrency(context.raw); return label; } } },
-                        datalabels: {
-                            color: '#fff',
-                            font: { weight: 'bold', size: 14 },
-                            formatter: (value, ctx) => {
-                                let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                                if (sum === 0) return '0%';
-                                let percentage = (value * 100 / sum).toFixed(1) + "%";
-                                return percentage;
-                            }
-                        }
-                    }
-                }
-            });
-
-            const currentYear = new Date().getFullYear();
-            const monthlyLabels = [];
-            const monthlyValues = [];
-           
-            for (let i = 0; i < 12; i++) {
-                const dateObj = new Date(currentYear, i, 1);
-                monthlyLabels.push(dateObj.toLocaleString('default', { month: 'short' }));
-                monthlyValues.push(0);
-            }
-
-            expenses.forEach(e => {
-                const d = parseDateDMY(e.date);
-                if (!isNaN(d) && d.getFullYear() === currentYear) {
-                    monthlyValues[d.getMonth()] += parseFloat(e.amount);
-                }
-            });
-
-            if (barChartInstance) barChartInstance.destroy();
-
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            barChartInstance = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: monthlyLabels,
-                    datasets: [{
-                        label: 'Spending',
-                        data: monthlyValues,
-                        backgroundColor: '#3b82f6', 
-                        borderColor: '#2563eb',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { family: "'Inter', sans-serif", size: 12 }, callback: function(value) { return '₹' + value; } } },
-                        x: { grid: { display: false }, ticks: { font: { family: "'Inter', sans-serif", size: 12 } } }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: function(context) { return 'Spent: ' + formatCurrency(context.raw); } } }
-                    }
-                }
-            });
-        }
-
-        // --- Helpers ---
-        function formatCurrency(amount) { return '₹' + parseFloat(amount).toFixed(2); }
-
-        function getCatColor(cat) {
-            const presets = {
-                'Food': '#0ea5e9', 'Transport': '#f59e0b', 'Education': '#2563eb',
-                'Entertainment': '#8b5cf6', 'Utilities': '#10b981', 'Shopping': '#ec4899',
-                'Health': '#14b8a6', 'Other': '#64748b'
-            };
-            if (presets[cat]) return presets[cat];
-            let hash = 0;
-            for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
-            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-            return '#' + "00000".substring(0, 6 - c.length) + c;
-        }
-
-        function getCatBg(cat) {
-            const presets = {
-                'Food': '#e0f2fe', 'Transport': '#fffbeb', 'Education': '#dbeafe',
-                'Entertainment': '#f5f3ff', 'Utilities': '#ecfdf5', 'Shopping': '#fdf2f8',
-                'Health': '#f0fdfa', 'Other': '#f1f5f9'
-            };
-            if (presets[cat]) return presets[cat];
-            let hash = 0;
-            for (let i = 0; i < cat.length; i++) hash = cat.charCodeAt(i) + ((hash << 5) - hash);
-            const h = Math.abs(hash) % 360;
-            return `hsl(${h}, 70%, 95%)`;
-        }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = type === 'success'
-                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--success')}" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> ${message}`
-                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--danger')}" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ${message}`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.animation = 'slideInRight 0.3s reverse forwards';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
         }
     </script>
 </body>
